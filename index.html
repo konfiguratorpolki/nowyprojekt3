@@ -894,6 +894,7 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
             sideColor: item.sideColor, shelfColor: item.shelfColor,
             shelfCountText: item.shelfCountText, extras: item.extras,
             price: item.price, quantity: item.quantity, code: item.code,
+            snapshot: item.snapshot || null,
         })),
         totals: { subtotal: totals.subtotal, discount: totals.totalDiscount, total: totals.total },
         configCodes: allCodes,
