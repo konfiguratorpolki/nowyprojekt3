@@ -18,6 +18,338 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <link rel="stylesheet" href="style.css" />
+    <style>
+
+
+
+        #dimensionOverlayCanvas { border-radius: 0.5rem; }
+        /* ===== BRAKUJĄCA SEKCJA - SHAKE + CZERWONA RAMKA ===== */
+        @keyframes sectionShake {
+            0%   { transform: translateX(0); border-color: #fca5a5; }
+            10%  { transform: translateX(-6px); border-color: #ef4444; }
+            20%  { transform: translateX(6px); }
+            30%  { transform: translateX(-5px); border-color: #ef4444; }
+            40%  { transform: translateX(5px); }
+            50%  { transform: translateX(-3px); border-color: #f87171; }
+            60%  { transform: translateX(3px); }
+            70%  { transform: translateX(-2px); }
+            80%  { transform: translateX(2px); }
+            90%  { transform: translateX(-1px); }
+            100% { transform: translateX(0); border-color: #fca5a5; }
+        }
+        .section-missing-shake {
+            animation: sectionShake 0.6s ease;
+            border-color: #fca5a5 !important;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important;
+        }
+        .missing-section-msg {
+            display: none;
+            background: #fef2f2;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ef4444;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: opacity 0.25s, transform 0.25s;
+        }
+        .missing-section-msg.missing-msg-show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+
+        /* ===== WŁASNE ROZMIESZCZENIE PÓŁEK — compact card ===== */
+        .csp-card {
+            border: 2px solid #d1d5db;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .csp-card.active {
+            border-color: #22c55e;
+            box-shadow: 0 2px 16px rgba(34,197,94,0.10);
+        }
+        .csp-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            cursor: pointer; user-select: none;
+            transition: background 0.15s;
+        }
+        .csp-header:hover { background: #fafafa; }
+        .csp-header-left { display: flex; align-items: center; gap: 10px; }
+        .csp-icon { width: 22px; height: 22px; stroke: #6b7280; flex-shrink: 0; transition: stroke 0.2s; }
+        .csp-card.active .csp-icon { stroke: #16a34a; }
+        .csp-title { font-size: 13px; font-weight: 700; color: #374151; }
+        .csp-card.active .csp-title { color: #15803d; }
+        .csp-subtitle { font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 5px; }
+        .csp-badge {
+            background: #16a34a; color: white;
+            font-size: 9px; font-weight: 700;
+            padding: 1px 6px; border-radius: 20px;
+        }
+        /* Toggle switch */
+        .custom-shelf-toggle-switch {
+            width: 40px; height: 22px;
+            background: #d1d5db;
+            border-radius: 11px;
+            position: relative;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .custom-shelf-toggle-switch.on { background: #16a34a; }
+        .custom-shelf-switch-knob {
+            position: absolute; top: 2px; left: 2px;
+            width: 18px; height: 18px;
+            background: white; border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        .custom-shelf-toggle-switch.on .custom-shelf-switch-knob { transform: translateX(18px); }
+        /* Body with steppers */
+        .csp-body {
+            border-top: 1.5px solid #e5e7eb;
+            animation: panelSlideIn 0.25s ease;
+        }
+        @keyframes panelSlideIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .csp-steppers {
+            display: flex;
+            border-bottom: none;
+        }
+        .csp-stepper-cell {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .csp-stepper-cell + .csp-stepper-cell { border-left: 1.5px solid #e5e7eb; }
+        .csp-stepper-cell .s-btn {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; border: none;
+            cursor: pointer; flex-shrink: 0;
+            transition: background 0.12s;
+            -webkit-tap-highlight-color: transparent; padding: 0;
+        }
+        .csp-stepper-cell .s-btn svg {
+            width: 16px; height: 16px; stroke: #9ca3af; stroke-width: 2.5;
+            transition: stroke 0.12s, transform 0.12s;
+        }
+        .csp-stepper-cell .s-btn:hover { background: #f0fdf4; }
+        .csp-stepper-cell .s-btn:hover svg { stroke: #16a34a; transform: scale(1.2); }
+        .csp-stepper-cell .s-btn:active { background: #dcfce7; }
+        .csp-stepper-label {
+            flex: 1; text-align: center;
+            font-size: 12px; font-weight: 600; color: #6b7280;
+            pointer-events: none; user-select: none;
+            white-space: nowrap;
+        }
+        .csp-stepper-cell.error .csp-stepper-label { color: #ef4444; }
+        .csp-stepper-cell.ok .csp-stepper-label { color: #16a34a; }
+        /* Error box */
+        .custom-shelf-error {
+            margin: 8px 12px 12px;
+            padding: 8px 10px;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #dc2626; font-weight: 600;
+        }
+        /* Old classes kept for JS compat */
+        .custom-shelf-panel { display: none; }
+        .custom-shelf-panel-info { display: none; }
+        .custom-shelf-inputs { display: none; }
+        .custom-shelf-row-feedback { display: none; }
+        .custom-shelf-stepper { display: none; }
+        .custom-shelf-row { display: none; }
+        .custom-shelf-row-label { display: none; }
+        /* ===== PRZYCISK STOP/WZNÓW OBRACANIE ===== */
+        .rotate-toggle-btn {
+            position: absolute !important;
+            bottom: 10px !important;
+            right: 10px !important;
+            z-index: 9999 !important;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(4px);
+            border: 1.5px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+            padding: 0;
+        }
+        .rotate-toggle-btn:hover {
+            background: white;
+            border-color: #9ca3af;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            transform: scale(1.08);
+        }
+        .rotate-toggle-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: #6b7280;
+        }
+        .rotate-toggle-btn.paused svg {
+            stroke: #16a34a;
+        }
+
+        /* ===== WŁASNE ROZMIESZCZENIE PÓŁEK ===== */
+        .custom-pos-toggle-label {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; border-radius: 12px;
+            border: 2px solid #e5e7eb; background: #f9fafb;
+            cursor: pointer; gap: 12px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .custom-pos-toggle-label:hover { border-color: #86efac; background: #f0fdf4; }
+        .custom-pos-toggle-label.active { border-color: #16a34a; background: #f0fdf4; }
+        .custom-pos-toggle-left {
+            display: flex; align-items: center; gap: 10px; flex: 1;
+        }
+        .custom-pos-toggle-left svg {
+            width: 22px; height: 22px; stroke: #6b7280; flex-shrink: 0;
+        }
+        .custom-pos-toggle-label.active .custom-pos-toggle-left svg { stroke: #16a34a; }
+        .custom-pos-toggle-title {
+            display: block; font-size: 13px; font-weight: 700; color: #374151;
+        }
+        .custom-pos-toggle-price {
+            display: inline-block; font-size: 11px; font-weight: 700;
+            color: #16a34a; background: #dcfce7; border-radius: 20px;
+            padding: 1px 8px; margin-top: 2px;
+        }
+        /* Switch */
+        .custom-pos-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .custom-pos-switch input { opacity: 0; width: 0; height: 0; }
+        .custom-pos-slider {
+            position: absolute; inset: 0; border-radius: 24px;
+            background: #d1d5db; cursor: pointer;
+            transition: background 0.25s;
+        }
+        .custom-pos-slider::before {
+            content: ''; position: absolute;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: white; left: 3px; top: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: transform 0.25s;
+        }
+        .custom-pos-switch input:checked + .custom-pos-slider { background: #16a34a; }
+        .custom-pos-switch input:checked + .custom-pos-slider::before { transform: translateX(20px); }
+
+        /* Panel */
+        .custom-pos-panel {
+            margin-top: 12px; border-radius: 12px;
+            border: 2px solid #86efac; background: #f0fdf4;
+            overflow: hidden;
+            animation: panelSlideIn 0.35s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes panelSlideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .custom-pos-header {
+            display: flex; align-items: flex-start; gap: 8px;
+            padding: 12px 16px 8px;
+            font-size: 11px; color: #166534; font-weight: 600; line-height: 1.4;
+        }
+        .custom-pos-header svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; stroke: #16a34a; }
+        .custom-pos-inputs { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Każdy wiersz półki */
+        .custom-pos-row {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .custom-pos-row-label {
+            font-size: 12px; font-weight: 600; color: #374151;
+            min-width: 56px; flex-shrink: 0;
+        }
+        .custom-pos-stepper {
+            display: flex; align-items: center; gap: 0;
+            border: 1.5px solid #d1d5db; border-radius: 10px;
+            overflow: hidden; background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .custom-pos-stepper button {
+            width: 40px; height: 40px; border: none; background: #f9fafb;
+            font-size: 18px; font-weight: 700; color: #374151;
+            cursor: pointer; flex-shrink: 0; line-height: 1;
+            transition: background 0.15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .custom-pos-stepper button:active { background: #e5e7eb; }
+        .custom-pos-stepper input[type=number] {
+            width: 56px; height: 40px; border: none; border-left: 1.5px solid #e5e7eb; border-right: 1.5px solid #e5e7eb;
+            text-align: center; font-size: 14px; font-weight: 700; color: #111827;
+            background: white; -moz-appearance: textfield;
+            outline: none;
+        }
+        .custom-pos-stepper input[type=number]::-webkit-outer-spin-button,
+        .custom-pos-stepper input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .custom-pos-stepper-unit {
+            font-size: 11px; color: #6b7280; font-weight: 600;
+            padding-right: 10px; padding-left: 4px;
+        }
+        .custom-pos-row-valid { color: #16a34a; font-size: 11px; font-weight: 600; }
+        .custom-pos-row-invalid { color: #ef4444; font-size: 11px; font-weight: 600; }
+        .custom-pos-error {
+            margin: 0 16px 12px; padding: 8px 12px;
+            background: #fef2f2; border-radius: 8px; border-left: 3px solid #ef4444;
+            font-size: 12px; color: #dc2626; font-weight: 600;
+        }
+        .custom-pos-stepper.invalid { border-color: #fca5a5; }
+        .custom-pos-stepper.valid { border-color: #86efac; }
+
+        /* ===== PODPOWIEDŹ LICZBY PÓŁEK ===== */
+        .shelf-count-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 9px 13px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1.5px solid #86efac;
+            border-radius: 8px;
+            animation: hintSlideIn 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        .shelf-count-hint svg {
+            width: 18px; height: 18px;
+            stroke: #16a34a;
+            flex-shrink: 0;
+        }
+        .shelf-count-hint span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #15803d;
+            line-height: 1.4;
+        }
+        @keyframes hintSlideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Puls sekcji półek wewnętrznych */
+        @keyframes shelfSectionPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); border-color: #86efac; }
+            50%  { box-shadow: 0 0 0 8px rgba(22,163,74,0); border-color: #4ade80; }
+            100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); border-color: #86efac; }
+        }
+        .shelf-section-pulse {
+            animation: shelfSectionPulse 0.9s ease 2;
+            border-color: #86efac !important;
+        }
+    </style>
 </head>
 <body class="flex flex-col justify-center items-center min-h-screen bg-stone-100 font-sans text-stone-800 pb-20 md:pb-0">
 
@@ -289,7 +621,7 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
                 <div id="mugShelfMountOptions" class="mt-4 pt-4 border-t border-dashed border-stone-200"></div>
                 <div id="mugShelfDividersOptions" class="mt-4 pt-4 border-t border-dashed border-stone-200">
                     <h3 class="text-md font-semibold mb-2 text-stone-700">Wstaw przegródki:</h3>
-                    <label class="flex items-center space-x-2"><input type="checkbox" id="dividersTop" class="rounded border-stone-300 text-green-600 shadow-sm focus:ring-green-500 focus:ring-offset-0 focus:ring-2" onchange="updatePreview(); updateOrderSummary();"><span>Na górze</span></label>
+                    <label class="flex items-center space-x-2"><input type="checkbox" id="dividersTop" class="rounded border-stone-300 text-green-600 shadow-sm focus:ring-green-500 focus:ring-offset-0 focus:ring-2" onchange="updatePreview(); updateOrderSummary(); showOrHideCustomShelfToggle(); if(customShelfPositionEnabled) buildCustomShelfInputs();"><span>Na górze</span></label>
                     <label class="flex items-center space-x-2 mt-1"><input type="checkbox" id="dividersMiddle" class="rounded border-stone-300 text-green-600 shadow-sm focus:ring-green-500 focus:ring-offset-0 focus:ring-2" onchange="updatePreview(); updateOrderSummary();"><span>Pośrodku</span></label>
                     <label class="flex items-center space-x-2 mt-1"><input type="checkbox" id="dividersBottom" class="rounded border-stone-300 text-green-600 shadow-sm focus:ring-green-500 focus:ring-offset-0 focus:ring-2" onchange="updatePreview(); updateOrderSummary();"><span>Na dole</span></label>
                 </div>
@@ -460,6 +792,7 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
             <div id="threeJsCanvasWrapper" class="flex-grow"> 
             </div>
 
+
             <div id="mugShelfDividerIconsContainer" class="z-10">
                 <div id="dividerIconGroup"> 
                     <div class="divider-control-item">
@@ -517,6 +850,28 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
          </div> 
         <div class="text-sm text-stone-600 italic mt-2 text-center md:hidden"></div>
          <div id="viewerInfoText" class="text-sm text-stone-600 italic mt-2 text-center hidden md:block"> Obróć lub zbliż model (przeciągnij myszką) </div>
+
+         <!-- WŁASNE ROZMIESZCZENIE PÓŁEK - widoczne pod 3D na desktop, pod shelfCount na mobile -->
+         <div id="customShelfPositionWrapper" style="display:none;" class="w-full max-w-lg mt-4">
+             <div class="csp-card">
+                 <div class="csp-header" onclick="toggleCustomShelfPosition()">
+                     <div class="csp-header-left">
+                         <svg class="csp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                         <div>
+                             <div class="csp-title">Własne rozmieszczenie półek</div>
+                             <div class="csp-subtitle">Ustaw na dowolnej wysokości <span class="csp-badge">+50 zł</span></div>
+                         </div>
+                     </div>
+                     <div class="custom-shelf-toggle-switch" id="customShelfSwitch">
+                         <div class="custom-shelf-switch-knob"></div>
+                     </div>
+                 </div>
+                 <div id="customShelfPositionPanel" class="csp-body" style="display:none;">
+                     <div id="customShelfInputs" class="csp-steppers"></div>
+                     <div id="customShelfError" class="custom-shelf-error" style="display:none;"></div>
+                 </div>
+             </div>
+         </div>
          <div id="modularInfoText" class="text-sm text-stone-600 mt-2 text-center hidden" style="display: none;"></div>
          <div id="shelfCountSection" class="p-6 shadow rounded-lg bg-white border border-stone-200 transition-shadow duration-200 hover:shadow-md mt-0,1 md:mt-8 w-full max-w-lg">
              <h2 class="text-lg font-semibold mb-4 flex items-center text-stone-800">
@@ -526,10 +881,17 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
                  </svg>
                  Dodaj półki wewnętrzne
              </h2>
-             <select id="shelfCount" class="custom-select w-full" onchange="updatePreview(); updateOrderSummary();">
+             <select id="shelfCount" class="custom-select w-full" onchange="showOrHideCustomShelfToggle(); if(customShelfPositionEnabled) buildCustomShelfInputs(); updatePreview(); updateOrderSummary();">
                  <option value="">-- Wybierz --</option>
              </select>
+             <div id="shelfCountHint" class="shelf-count-hint" style="display:none;">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                 <span id="shelfCountHintText">Możesz wybrać więcej półek!</span>
+             </div>
              
+             <!-- WŁASNE ROZMIESZCZENIE PÓŁEK - mobile (wyłączone, używamy tylko desktop panel) -->
+             <div id="customShelfPositionWrapperMobile" style="display:none !important;" class="mt-4 md:hidden"></div>
+
              <div class="mt-4 pt-3 border-t border-dashed border-stone-200 space-y-1">
                  <p id="gapDisplay" class="text-xs text-stone-500">
                      Odległość między półkami: <span id="gapSummaryDisplay" class="font-semibold text-stone-600"></span>
@@ -538,6 +900,7 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
                      Wymiar przegródki: szer. 12,5cm, wys. 10,9cm
                  </div>
              </div>
+
          </div>
          <details class="bg-emerald-50 border border-emerald-200 rounded-lg mt-8 w-full max-w-lg hidden md:block transition-shadow duration-200 hover:shadow-md overflow-hidden group">
              <summary class="p-6 flex justify-between items-center cursor-pointer list-none hover:bg-emerald-100 transition-colors duration-150">
@@ -581,13 +944,14 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
                 <li class="py-2 flex justify-between items-center"><span id="shelfColorSummaryLabel" class="font-medium text-stone-600">Kolor półek i podstaw:</span><span id="shelfColorSummary" class="text-stone-900 text-right">nie wybrano</span></li>
                 <li class="py-2 flex justify-between items-center"><span id="shelfCountSummaryLabel" class="font-medium text-stone-600">Ilość półek wewn.:</span><span id="shelfCountSummary" class="text-stone-900"></span></li>
                 <li class="py-2 flex justify-between items-center"><span class="font-medium text-stone-600">Odległość między półkami:</span><span id="gapSummary" class="text-stone-900"></span></li>
+                <li id="customPosSummaryRow" class="py-2" style="display:none"><div id="customPosSummary" class="text-stone-900 w-full"></div></li>
                 <li class="py-2 flex justify-between items-center"><span class="font-medium text-stone-600">Opcje dodatkowe:</span><span id="extraOptionsSummary" class="text-stone-900 text-right">standardowa</span></li>
                 <li class="pt-2 pb-1 flex justify-between items-center"><span class="font-medium text-stone-600">Materiał:</span><span class="text-stone-900 text-right">płyta laminowana gr. 1,8 cm</span></li>
                 <li class="pt-1 pb-2 flex justify-between items-center"><span class="font-medium text-stone-600">Termin realizacji:</span><span class="text-stone-900 text-right">3‑5 dni roboczych</span></li>
             </ul>
 
             <div class="mt-5 pt-4 border-t border-stone-200">
-                <div id="priceAndActionsContainer" style="display: none;">
+                <div id="priceAndActionsContainer" style="display: block;">
     
     <div class="bg-stone-100 border border-stone-200 rounded-lg p-4 mb-4">
         <div class="flex justify-center items-baseline w-full relative">
@@ -618,22 +982,12 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
         </div>
     </div>
 
-    <div class="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start text-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p class="text-sm text-emerald-800 font-semibold text-left">
-            Kod konfiguracyjny półki znajdziesz po dodaniu produktu do koszyka.
-        </p>
-    </div>
+
 
 </div>
-                <p id="priceHint" class="text-stone-500 text-xs mt-2 text-center">Wybierz wszystkie parametry, aby zobaczyć cenę.</p>
+
                  
-                <div id="viewOrderSection" class="mt-6 pt-4 border-t border-dashed border-stone-300">
-                     <label for="viewOrderCodeInput">Masz kod zamówienia?</label>
-                     <input type="text" id="viewOrderCodeInput" class="text-base" placeholder="Wklej kod tutaj, aby zobaczyć projekt...">
-                </div>
+
             </div>
         </div>
     </div>
@@ -661,7 +1015,7 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
 // ─────────────────────────────────────────────────────────────────────────────
 
 // --- Zmienne globalne i elementy DOM ---
-        let scene, camera, renderer, shelfGroup, controls;
+        let scene, camera, renderer, shelfGroup, controls, dimensionGroup;
         let shelfContainer, threeJsCanvasWrapper, materialSwiperInstance, gallerySwiperInstance;
         let shelfTypeSelect, widthSelect, heightSelect, depthSelect, shelfCountSelect;
         let customWidthInput, customWidthDisplay, customWidthFee;
@@ -674,6 +1028,7 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
         let galleryTabsContainer, galleryGridContainer, galleryImageArea, galleryPrevArrow, galleryNextArrow;
         let show3dButton, collapse3dPanelButton;
         let autoRotateEnabled = true;
+        let userStoppedRotation = false;
         const initialCameraPosition = { x: 4, y: 5, z: 7 };
         let currentAnimationTimeline = null;
         let lastValidConfig = {};
@@ -744,14 +1099,74 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
         function openCart() { if (cartPanel && cartPanelOverlay) { cartPanel.classList.add('visible'); cartPanelOverlay.classList.add('visible'); document.body.style.overflow = 'hidden'; } }
         function closeCart() { if (cartPanel && cartPanelOverlay) { cartPanel.classList.remove('visible'); cartPanelOverlay.classList.remove('visible'); document.body.style.overflow = ''; } }
         
-        async function addToCart() { const orderCode = generateOrderCode(); const priceDetails = computePriceDetailed(); if (!orderCode || !priceDetails) { alert("Proszę, dokończ konfigurację półki przed dodaniem jej do koszyka."); return; } const existingItem = cart.find(item => item.code === orderCode); if (existingItem) { increaseQuantity(existingItem.code); openCart(); const itemElement = cartItemsContainer.querySelector(`[data-code="${existingItem.code}"]`); if(itemElement) { itemElement.classList.remove('section-highlight-flash'); void itemElement.offsetWidth; itemElement.classList.add('section-highlight-flash'); } return; } const activeAddToCartButton = document.getElementById('addToCartBtn'); const originalButtonContent = activeAddToCartButton.innerHTML; activeAddToCartButton.innerHTML = `<svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Generuję...</span>`; activeAddToCartButton.disabled = true; try { const snapshotDataUrl = await generate3dSnapshotFromCurrentModel(); 
+        function highlightMissingSection() {
+            const typeVal = shelfTypeSelect ? shelfTypeSelect.value : '';
+            const widthVal = widthSelect ? widthSelect.value : '';
+            const heightVal = heightSelect ? heightSelect.value : '';
+            const depthVal = depthSelect ? depthSelect.value : '';
+            const sideColor = sideColorSelect ? sideColorSelect.value : '';
+            const shelfColor = shelfColorSelect ? shelfColorSelect.value : '';
+
+            let targetSection = null;
+            let message = '';
+
+            if (!typeVal || typeVal === '') {
+                targetSection = shelfTypeSectionAnchor;
+                message = 'Wybierz rodzaj półki';
+            } else if (typeVal !== 'modular' && (!widthVal || widthVal === '')) {
+                targetSection = dimensionSectionAnchor;
+                message = 'Wybierz szerokość';
+            } else if (typeVal !== 'modular' && (!heightVal || heightVal === '')) {
+                targetSection = dimensionSectionAnchor;
+                message = 'Wybierz wysokość';
+            } else if (typeVal !== 'modular' && (!depthVal || depthVal === '')) {
+                targetSection = dimensionSectionAnchor;
+                message = 'Wybierz głębokość';
+            } else if (!sideColor || sideColor === '') {
+                targetSection = colorSectionAnchor;
+                message = 'Wybierz kolor boków';
+            } else if (!shelfColor || shelfColor === '') {
+                targetSection = colorSectionAnchor;
+                message = 'Wybierz kolor półek';
+            }
+
+            if (!targetSection) return;
+
+            // Scroll to section
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Shake + red border animation
+            targetSection.classList.remove('section-missing-shake');
+            void targetSection.offsetWidth;
+            targetSection.classList.add('section-missing-shake');
+
+            // Show inline message inside section
+            let msgEl = targetSection.querySelector('.missing-section-msg');
+            if (!msgEl) {
+                msgEl = document.createElement('div');
+                msgEl.className = 'missing-section-msg';
+                targetSection.insertBefore(msgEl, targetSection.firstChild);
+            }
+            msgEl.textContent = '👆 ' + message;
+            msgEl.classList.remove('missing-msg-show');
+            void msgEl.offsetWidth;
+            msgEl.classList.add('missing-msg-show');
+
+            setTimeout(() => {
+                targetSection.classList.remove('section-missing-shake');
+                msgEl.classList.remove('missing-msg-show');
+            }, 3500);
+        }
+
+        async function addToCart() { const orderCode = generateOrderCode(); const priceDetails = computePriceDetailed(); if (!orderCode || !priceDetails) { highlightMissingSection(); return; } const existingItem = cart.find(item => item.code === orderCode); if (existingItem) { increaseQuantity(existingItem.code); openCart(); const itemElement = cartItemsContainer.querySelector(`[data-code="${existingItem.code}"]`); if(itemElement) { itemElement.classList.remove('section-highlight-flash'); void itemElement.offsetWidth; itemElement.classList.add('section-highlight-flash'); } return; } const activeAddToCartButton = document.getElementById('addToCartBtn'); const originalButtonContent = activeAddToCartButton.innerHTML; activeAddToCartButton.innerHTML = `<svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Generuję...</span>`; activeAddToCartButton.disabled = true; try { const snapshotDataUrl = await generate3dSnapshotFromCurrentModel(); 
         const isModular = shelfTypeSelect.value === 'modular';
 
         const newItem = {
             name: shelfTypeSelect.options[shelfTypeSelect.selectedIndex].text,
             summary: `${document.getElementById("widthSummary").textContent} x ${document.getElementById("heightSummary").textContent} x ${document.getElementById("depthSummary").textContent}`,
             shelfCountText: document.getElementById("shelfCountSummary").textContent,
-            gapInfo: document.getElementById("gapSummary").textContent,
+            gapInfo: customShelfPositionEnabled ? 'Własne rozmieszczenie' : document.getElementById("gapSummary").textContent,
+                customPosInfo: (() => { const cps = typeof getCustomPositionSummary === 'function' ? getCustomPositionSummary() : null; if (!cps) return null; const d = cps.distances; const labels = d.map((v, i) => i === 0 ? `dół: ${v}` : i === d.length - 1 ? `góra: ${v}` : `${i}–${i+1}: ${v}`); return labels.join(' · ') + ' cm'; })(),
             sideColor: document.getElementById("sideColorSummary").textContent,
             shelfColor: document.getElementById("shelfColorSummary").textContent,
             extras: document.getElementById("extraOptionsSummary").textContent,
@@ -765,7 +1180,7 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
         function triggerDiscountAnimation() { const subtotalPriceEl = document.getElementById('cartSubtotalPrice'); const discountLineEl10 = document.getElementById('cartDiscountLine10'); const discountLineEl25 = document.getElementById('cartDiscountLine25'); const totalPriceLineEl = document.getElementById('cartTotalPriceLine'); if (!subtotalPriceEl || !totalPriceLineEl || !discountLineEl10 || !discountLineEl25) { return; } subtotalPriceEl.classList.add('discount-subtotal-wobble', 'discount-subtotal-slash'); if(discountLineEl10.style.display === 'flex') discountLineEl10.classList.add('discount-line-pop'); if(discountLineEl25.style.display === 'flex') discountLineEl25.classList.add('discount-line-pop'); totalPriceLineEl.classList.add('discount-total-glow'); setTimeout(() => { subtotalPriceEl.classList.remove('discount-subtotal-wobble'); if(discountLineEl10) discountLineEl10.classList.remove('discount-line-pop'); if(discountLineEl25) discountLineEl25.classList.remove('discount-line-pop'); totalPriceLineEl.classList.remove('discount-total-glow'); }, 2000); }
         function updateCartDisplay() { if (!cartItemsContainer || !cartBadges) return; const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); const justGotDiscount = (totalItems === 1 && previousCartItemCount === 0) || (totalItems >= 2 && previousCartItemCount < 2); cartItemsContainer.innerHTML = ''; if (cart.length === 0) { if(cartEmptyMessage) { cartEmptyMessage.style.display = 'block'; cartItemsContainer.appendChild(cartEmptyMessage); } } else { if(cartEmptyMessage) cartEmptyMessage.style.display = 'none'; cart.forEach(item => { const itemElement = document.createElement('div'); itemElement.className = 'flex items-start p-2.5 border-b border-stone-200 last:border-b-0 gap-3'; itemElement.dataset.code = item.code; 
         
-        itemElement.innerHTML = ` <div class="flex-shrink-0 w-20 h-20 bg-stone-100 rounded-md flex items-center justify-center overflow-hidden border border-stone-200"> ${item.snapshot ? `<img src="${item.snapshot}" alt="Miniatura półki" class="w-full h-full object-contain">` : ''} </div> <div class="flex-grow flex flex-col justify-between h-full min-h-[80px]"> <div> <div class="flex justify-between items-start"> <p class="font-semibold text-stone-800 leading-tight pr-2">${item.name}</p> <button onclick="removeFromCart('${item.code}')" class="text-stone-400 hover:text-red-500 transition-colors p-1 -mt-1 -mr-1" title="Usuń z koszyka"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> </button> </div> <p class="text-xs text-stone-500">${item.summary} | Boki: ${item.sideColor} | Półki: ${item.shelfColor}</p> </div> <div class="flex justify-between items-center mt-2"> <div class="quantity-controls"> <button class="quantity-btn" onclick="decreaseQuantity('${item.code}')">-</button> <span class="quantity-display">${item.quantity}</span> <button class="quantity-btn" onclick="increaseQuantity('${item.code}')">+</button> </div> <p class="font-bold text-stone-800 text-base">${(item.price * item.quantity).toFixed(2)} zł</p> </div> </div> `; cartItemsContainer.appendChild(itemElement); }); } if (cartDiscountReminder) { if (totalItems === 1) { cartDiscountReminder.innerHTML = `✨ <b>Otrzymujesz 10% rabatu!</b> Dodaj jeszcze jedną półkę, a na tańszą z nich dostaniesz aż <b>25% zniżki.</b>`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else if (totalItems >= 2) { cartDiscountReminder.innerHTML = `🎁 <b>Świetnie!</b> Otrzymujesz <b>10% rabatu</b> na najdroższą półkę i <b>25%</b> na najtańszą!`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else { cartDiscountReminder.style.display = 'none'; } } const totals = calculateCartTotal(); if (totals.totalDiscount > 0) { cartSubtotalLine.style.display = 'flex'; cartSubtotalPrice.textContent = `${totals.subtotal.toFixed(2)} zł`; cartDiscountLine10.style.display = totals.discount10 > 0 ? 'flex' : 'none'; cartDiscountAmount10.textContent = `- ${totals.discount10.toFixed(2)} zł`; cartDiscountLine25.style.display = totals.discount25 > 0 ? 'flex' : 'none'; cartDiscountAmount25.textContent = `- ${totals.discount25.toFixed(2)} zł`; } else { cartSubtotalLine.style.display = 'none'; cartDiscountLine10.style.display = 'none'; cartDiscountLine25.style.display = 'none'; } if (totals.totalDiscount === 0) { cartSubtotalPrice.classList.remove('discount-subtotal-slash'); } if (justGotDiscount) { triggerDiscountAnimation(); } cartTotalPrice.textContent = `${totals.total.toFixed(2)} zł`; cartBadges.forEach(badge => { badge.textContent = totalItems; badge.style.display = totalItems > 0 ? 'flex' : 'none'; }); if(mobileCartButton) { const mobileCartPriceSpan = mobileCartButton.querySelector('.mobile-cart-price'); if(mobileCartPriceSpan) { mobileCartPriceSpan.textContent = totalItems > 0 ? `${totals.total.toFixed(2)} zł` : 'Koszyk'; } } cartCheckoutButton.disabled = cart.length === 0; previousCartItemCount = totalItems; }
+        itemElement.innerHTML = ` <div class="flex-shrink-0 w-20 h-20 bg-stone-100 rounded-md flex items-center justify-center overflow-hidden border border-stone-200"> ${item.snapshot ? `<img src="${item.snapshot}" alt="Miniatura półki" class="w-full h-full object-contain">` : ''} </div> <div class="flex-grow flex flex-col justify-between h-full min-h-[80px]"> <div> <div class="flex justify-between items-start"> <p class="font-semibold text-stone-800 leading-tight pr-2">${item.name}</p> <button onclick="removeFromCart('${item.code}')" class="text-stone-400 hover:text-red-500 transition-colors p-1 -mt-1 -mr-1" title="Usuń z koszyka"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> </button> </div> <p class="text-xs text-stone-500">${item.summary} | Boki: ${item.sideColor} | Półki: ${item.shelfColor}</p>${item.customPosInfo ? `<p class="text-xs mt-0.5" style="color:#16a34a;font-weight:600">Rozmieszczenie: <span style="color:#374151;font-weight:500">${item.customPosInfo}</span></p>` : ''} </div> <div class="flex justify-between items-center mt-2"> <div class="quantity-controls"> <button class="quantity-btn" onclick="decreaseQuantity('${item.code}')">-</button> <span class="quantity-display">${item.quantity}</span> <button class="quantity-btn" onclick="increaseQuantity('${item.code}')">+</button> </div> <p class="font-bold text-stone-800 text-base">${(item.price * item.quantity).toFixed(2)} zł</p> </div> </div> `; cartItemsContainer.appendChild(itemElement); }); } if (cartDiscountReminder) { if (totalItems === 1) { cartDiscountReminder.innerHTML = `✨ <b>Otrzymujesz 10% rabatu!</b> Dodaj jeszcze jedną półkę, a na tańszą z nich dostaniesz aż <b>25% zniżki.</b>`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else if (totalItems >= 2) { cartDiscountReminder.innerHTML = `🎁 <b>Świetnie!</b> Otrzymujesz <b>10% rabatu</b> na najdroższą półkę i <b>25%</b> na najtańszą!`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else { cartDiscountReminder.style.display = 'none'; } } const totals = calculateCartTotal(); if (totals.totalDiscount > 0) { cartSubtotalLine.style.display = 'flex'; cartSubtotalPrice.textContent = `${totals.subtotal.toFixed(2)} zł`; cartDiscountLine10.style.display = totals.discount10 > 0 ? 'flex' : 'none'; cartDiscountAmount10.textContent = `- ${totals.discount10.toFixed(2)} zł`; cartDiscountLine25.style.display = totals.discount25 > 0 ? 'flex' : 'none'; cartDiscountAmount25.textContent = `- ${totals.discount25.toFixed(2)} zł`; } else { cartSubtotalLine.style.display = 'none'; cartDiscountLine10.style.display = 'none'; cartDiscountLine25.style.display = 'none'; } if (totals.totalDiscount === 0) { cartSubtotalPrice.classList.remove('discount-subtotal-slash'); } if (justGotDiscount) { triggerDiscountAnimation(); } cartTotalPrice.textContent = `${totals.total.toFixed(2)} zł`; cartBadges.forEach(badge => { badge.textContent = totalItems; badge.style.display = totalItems > 0 ? 'flex' : 'none'; }); if(mobileCartButton) { const mobileCartPriceSpan = mobileCartButton.querySelector('.mobile-cart-price'); if(mobileCartPriceSpan) { mobileCartPriceSpan.textContent = totalItems > 0 ? `${totals.total.toFixed(2)} zł` : 'Koszyk'; } } cartCheckoutButton.disabled = cart.length === 0; previousCartItemCount = totalItems; }
         function handleCheckout() {
     if (cart.length === 0) return;
     closeCart();
@@ -796,28 +1211,41 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
     cartSummaryItemsContainer.innerHTML = '';
     cart.forEach(item => {
         const itemCard = document.createElement('div');
-        itemCard.className = 'p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-start gap-3';
+        itemCard.className = 'p-3 bg-stone-50 rounded-lg border border-stone-200';
+        
+        // Buduj HTML rozmieszczenia
+        let customPosHtml = '';
+        if (item.customPosInfo) {
+            customPosHtml = `
+              <div class="mt-1.5 pt-1.5 border-t border-stone-200" style="font-size:11px;line-height:1.4">
+                <span style="color:#16a34a;font-weight:700">Rozmieszczenie:</span> <span style="color:#374151">${item.customPosInfo}</span>
+              </div>`;
+        }
+
         itemCard.innerHTML = `
-          <div class="summary-snapshot-container flex-shrink-0 w-20 h-20">
-            ${item.snapshot
-              ? `<img src="${item.snapshot}" alt="Podgląd 3D półki: ${item.name}" class="w-full h-full object-contain" />`
-              : '<div class="text-xs text-stone-500 p-2 flex items-center justify-center h-full">Brak podglądu</div>'}
-          </div>
-          <div class="flex-grow min-w-0">
-            <div class="flex justify-between items-start gap-2">
-              <div>
-                <p class="font-semibold text-sm text-stone-800 leading-tight">${item.name}</p>
-                <p class="text-xs text-stone-500">Ilość: ${item.quantity}</p>
-              </div>
-              <p class="font-bold text-lg text-stone-800 flex-shrink-0">${(item.price * item.quantity).toFixed(2)} zł</p>
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-20 h-20 bg-white rounded-lg border border-stone-200 overflow-hidden">
+              ${item.snapshot
+                ? `<img src="${item.snapshot}" alt="Podgląd 3D półki: ${item.name}" class="w-full h-full object-contain" />`
+                : '<div class="text-xs text-stone-500 p-2 flex items-center justify-center h-full">Brak podglądu</div>'}
             </div>
-            <dl class="text-xs space-y-0.5 mt-2">
-              <div class="flex justify-between gap-2"><dt class="text-stone-500">Wymiary:</dt><dd class="font-semibold text-stone-700 text-right">${item.summary}</dd></div>
-              <div class="flex justify-between gap-2"><dt class="text-stone-500">Półki:</dt><dd class="font-semibold text-stone-700 text-right">${item.shelfCountText}</dd></div>
-              <div class="flex justify-between gap-2"><dt class="text-stone-500">Kolor boków:</dt><dd class="font-semibold text-stone-700 text-right">${item.sideColor}</dd></div>
-              <div class="flex justify-between gap-2"><dt class="text-stone-500">Kolor półek:</dt><dd class="font-semibold text-stone-700 text-right">${item.shelfColor}</dd></div>
-              <div class="flex justify-between gap-2"><dt class="text-stone-500">Opcje:</dt><dd class="font-semibold text-stone-700 text-right">${item.extras}</dd></div>
-            </dl>
+            <div class="flex-grow min-w-0">
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <p class="font-semibold text-sm text-stone-800 leading-tight">${item.name}</p>
+                  <p class="text-xs text-stone-500">Ilość: ${item.quantity}</p>
+                </div>
+                <p class="font-bold text-lg text-stone-800 flex-shrink-0">${(item.price * item.quantity).toFixed(2)} zł</p>
+              </div>
+              <dl class="text-xs space-y-0.5 mt-2">
+                <div class="flex justify-between gap-2"><dt class="text-stone-500">Wymiary:</dt><dd class="font-semibold text-stone-700 text-right">${item.summary}</dd></div>
+                <div class="flex justify-between gap-2"><dt class="text-stone-500">Półki:</dt><dd class="font-semibold text-stone-700 text-right">${item.shelfCountText}</dd></div>
+                <div class="flex justify-between gap-2"><dt class="text-stone-500">Kolor boków:</dt><dd class="font-semibold text-stone-700 text-right">${item.sideColor}</dd></div>
+                <div class="flex justify-between gap-2"><dt class="text-stone-500">Kolor półek:</dt><dd class="font-semibold text-stone-700 text-right">${item.shelfColor}</dd></div>
+                <div class="flex justify-between gap-2"><dt class="text-stone-500">Opcje:</dt><dd class="font-semibold text-stone-700 text-right">${item.extras}</dd></div>
+              </dl>
+              ${customPosHtml}
+            </div>
           </div>`;
         cartSummaryItemsContainer.appendChild(itemCard);
     });
@@ -894,7 +1322,6 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
             sideColor: item.sideColor, shelfColor: item.shelfColor,
             shelfCountText: item.shelfCountText, extras: item.extras,
             price: item.price, quantity: item.quantity, code: item.code,
-            snapshot: item.snapshot || null,
         })),
         totals: { subtotal: totals.subtotal, discount: totals.totalDiscount, total: totals.total },
         configCodes: allCodes,
@@ -924,7 +1351,7 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
     }
 }
         function closeCartSummaryModal() { if (cartSummaryModalOverlay) { cartSummaryModalOverlay.classList.remove('visible'); const modalBody = document.querySelector('#cartSummaryModal .modal-body'); if (modalBody && modalScrollListener) { modalBody.removeEventListener('scroll', modalScrollListener); modalScrollListener = null; } } }
-        function downloadFullCartSummary() { if (cart.length === 0) { alert("Koszyk jest pusty."); return; } const totals = calculateCartTotal(); const allCodes = cart.flatMap(item => Array(item.quantity).fill(item.code)).join('\n'); const date = new Date().toLocaleString('pl-PL'); let content = `PODSUMOWANIE ZAMÓWIENIA\n`; content += `Data wygenerowania: ${date}\n`; content += `========================================\n\n`; cart.forEach((item, index) => { content += `PRODUKT ${index + 1}: ${item.name} (x${item.quantity})\n`; content += `  Wymiary: ${item.summary}\n`; content += `  Kolor boków: ${item.sideColor}\n`; content += `  Kolor półek: ${item.shelfColor}\n`; content += `  Ilość półek wewn.: ${item.shelfCountText}\n`; content += `  Opcje: ${item.extras}\n`; content += `  Cena jedn.: ${item.price.toFixed(2)} zł\n\n`; }); content += `========================================\n`; if (totals.totalDiscount > 0) { content += `SUMA CZĘŚCIOWA: ${totals.subtotal.toFixed(2)} zł\n`; if(totals.discount10 > 0) content += `Rabat na 1. półkę (-10%): -${totals.discount10.toFixed(2)} zł\n`; if(totals.discount25 > 0) content += `Rabat na 2. półkę (-25%): -${totals.discount25.toFixed(2)} zł\n`; } content += `ŁĄCZNIE DO ZAPŁATY: ${totals.total.toFixed(2)} zł\n\n`; content += `KODY ZAMÓWIEŃ DO WKLEJENIA NA ALLEGRO:\n`; content += `${allCodes}\n`; content += `========================================\n`; const blob = new Blob([content], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; const filenameDate = new Date().toISOString().slice(0, 10); link.download = `zamowienie-polki-${filenameDate}.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); }
+        function downloadFullCartSummary() { if (cart.length === 0) { alert("Koszyk jest pusty."); return; } const totals = calculateCartTotal(); const allCodes = cart.flatMap(item => Array(item.quantity).fill(item.code)).join('\n'); const date = new Date().toLocaleString('pl-PL'); let content = `PODSUMOWANIE ZAMÓWIENIA\n`; content += `Data wygenerowania: ${date}\n`; content += `========================================\n\n`; cart.forEach((item, index) => { content += `PRODUKT ${index + 1}: ${item.name} (x${item.quantity})\n`; content += `  Wymiary: ${item.summary}\n`; content += `  Kolor boków: ${item.sideColor}\n`; content += `  Kolor półek: ${item.shelfColor}\n`; content += `  Ilość półek wewn.: ${item.shelfCountText}\n`; content += `  Opcje: ${item.extras}\n`; if (item.customPosInfo) { content += `  Rozmieszczenie: ${item.customPosInfo}\n`; } content += `  Cena jedn.: ${item.price.toFixed(2)} zł\n\n`; }); content += `========================================\n`; if (totals.totalDiscount > 0) { content += `SUMA CZĘŚCIOWA: ${totals.subtotal.toFixed(2)} zł\n`; if(totals.discount10 > 0) content += `Rabat na 1. półkę (-10%): -${totals.discount10.toFixed(2)} zł\n`; if(totals.discount25 > 0) content += `Rabat na 2. półkę (-25%): -${totals.discount25.toFixed(2)} zł\n`; } content += `ŁĄCZNIE DO ZAPŁATY: ${totals.total.toFixed(2)} zł\n\n`; content += `KODY ZAMÓWIEŃ DO WKLEJENIA NA ALLEGRO:\n`; content += `${allCodes}\n`; content += `========================================\n`; const blob = new Blob([content], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; const filenameDate = new Date().toISOString().slice(0, 10); link.download = `zamowienie-polki-${filenameDate}.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); }
         
     function applyShelfConfigurationFromGallery(galleryIndex, imageIndex) {
             // POCZĄTEK SEKCJI DLA PÓŁKI MODUŁOWEJ
@@ -1087,9 +1514,482 @@ window.BACKEND_URL = 'https://polki-backend.onrender.com';
 
         function getCurrentWidth() { const widthOption = widthSelect.value; if (widthOption === 'custom') { if (customWidthInput) { return parseInt(customWidthInput.value) || 35; } else { return 35; } } else if (widthOption && widthOption !== "") { return parseInt(widthOption); } return NaN; }
         function updateDepthOptions() { const width = getCurrentWidth(); const height = heightSelect.value; const currentDepth = depthSelect.value; let availableDepths = ['10']; const widthValue = widthSelect.value; let allow15 = false; if (isNaN(width) || !height || height === "") { depthSelect.innerHTML = '<option value="">-- Wybierz --</option>'; depthSelect.value = ""; return; } if (widthValue === "custom") { const customWidth = width; const standardWidthKey = customWidth < 39 ? "34" : customWidth < 47 ? "44" : customWidth < 54 ? "50" : "60"; if (pricing[standardWidthKey]?.[height]?.['15'] && Object.keys(pricing[standardWidthKey]?.[height]?.['15']).length > 0) { allow15 = true; } } else { const standardWidthKey = String(width); if (pricing[standardWidthKey]?.[height]?.['15'] && Object.keys(pricing[standardWidthKey]?.[height]?.['15']).length > 0) { allow15 = true; } } if (allow15) availableDepths.push('15'); depthSelect.innerHTML = '<option value="">-- Wybierz --</option>'; availableDepths.forEach(depth => { const option = document.createElement('option'); option.value = depth; option.textContent = `${depth} cm`; depthSelect.appendChild(option); }); if (availableDepths.includes(currentDepth)) { depthSelect.value = currentDepth; } else { depthSelect.value = ""; } }
-        function updateShelfCountOptions() { const height = heightSelect.value; const shelfType = shelfTypeSelect.value; const currentValue = shelfCountSelect.value; let options = { '0': 'brak półek' }; if (!height || height === "" || shelfType === 'mug_shelf' || shelfType === 'modular') { shelfCountSelect.innerHTML = ''; if (!height || height === "") { const option = document.createElement('option'); option.value = '0'; option.textContent = 'brak półek'; shelfCountSelect.appendChild(option); shelfCountSelect.value = '0'; } return; } if (height === "40") options['2'] = '2 półki'; else if (height === "60") { options['2'] = '2 półki'; options['3'] = '3 półki'; } else if (height === "80") { options['2'] = '2 półki'; options['3'] = '3 półki'; options['4'] = '4 półki'; options['5'] = '5 półki'; } shelfCountSelect.innerHTML = ''; for (const value in options) { const option = document.createElement('option'); option.value = value; option.textContent = options[value]; shelfCountSelect.appendChild(option); } if (options.hasOwnProperty(currentValue)) { shelfCountSelect.value = currentValue; } else { shelfCountSelect.value = '0'; } }
+
+
+        // ===== WŁASNE ROZMIESZCZENIE PÓŁEK =====
+        let customPositionEnabled = false;
+        let customPositions = []; // tablica pozycji od dołu w cm
+
+        function handleCustomPositionToggle() {
+            const toggle = document.getElementById('customPositionToggle');
+            const panel = document.getElementById('customPositionPanel');
+            const label = document.getElementById('customPositionToggleLabel');
+            customPositionEnabled = toggle.checked;
+
+            if (customPositionEnabled) {
+                panel.style.display = 'block';
+                label.classList.add('active');
+                buildCustomPositionInputs();
+                // Zatrzymaj obracanie 3D
+                autoRotateEnabled = false;
+                const btn = document.getElementById('rotateToggleBtn');
+                const ip = document.getElementById('rotateIconPause');
+                const ipl = document.getElementById('rotateIconPlay');
+                if (btn && ip && ipl) { btn.classList.add('paused'); ip.style.display = 'none'; ipl.style.display = ''; }
+            } else {
+                panel.style.display = 'none';
+                label.classList.remove('active');
+                customPositions = [];
+                // Wznów obracanie
+                autoRotateEnabled = true;
+                const btn = document.getElementById('rotateToggleBtn');
+                const ip = document.getElementById('rotateIconPause');
+                const ipl = document.getElementById('rotateIconPlay');
+                if (btn && ip && ipl) { btn.classList.remove('paused'); ip.style.display = ''; ipl.style.display = 'none'; }
+            }
+            updateOrderSummary();
+        }
+
+        function buildCustomPositionInputs() {
+            const container = document.getElementById('customPositionInputs');
+            if (!container) return;
+            const count = parseInt(shelfCountSelect.value) || 0;
+            const height = parseInt(heightSelect.value) || 60;
+            // Grubość płyty 1.8cm, podstawa/dach ~1.8cm, wolna przestrzeń = height - 2*1.8
+            const innerHeight = height - 3.6;
+
+            // Domyślne równomierne rozmieszczenie
+            if (customPositions.length !== count) {
+                customPositions = [];
+                for (let i = 1; i <= count; i++) {
+                    customPositions.push(Math.round(innerHeight * i / (count + 1)));
+                }
+            }
+
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const row = document.createElement('div');
+                row.className = 'custom-pos-row';
+                row.innerHTML = `
+                    <span class="custom-pos-row-label">Półka ${i + 1}:</span>
+                    <div class="custom-pos-stepper" id="stepper-${i}">
+                        <button type="button" onclick="stepCustomPos(${i}, -1)" aria-label="Mniej">−</button>
+                        <input type="number" id="customPosInput-${i}" value="${customPositions[i]}"
+                            min="11" max="${Math.round(innerHeight)}"
+                            oninput="onCustomPosInput(${i})" onchange="onCustomPosInput(${i})">
+                        <span class="custom-pos-stepper-unit">cm</span>
+                        <button type="button" onclick="stepCustomPos(${i}, 1)" aria-label="Więcej">+</button>
+                    </div>
+                    <span class="custom-pos-row-status" id="status-${i}"></span>`;
+                container.appendChild(row);
+            }
+            validateCustomPositions();
+        }
+
+        function getCustomPosBounds(idx) {
+            const height = parseInt(heightSelect.value) || 60;
+            const innerHeight = height - 3.6;
+            const MIN_GAP = 11;
+
+            // Zbierz pozycje INNYCH półek (bez aktualnie edytowanej)
+            const others = customPositions
+                .map((v, i) => ({ v, i }))
+                .filter(s => s.i !== idx)
+                .sort((a, b) => a.v - b.v);
+
+            let lowerNeighbor = null;
+            let upperNeighbor = null;
+            for (const s of others) {
+                if (s.v <= customPositions[idx]) {
+                    lowerNeighbor = s.v;
+                } else if (upperNeighbor === null) {
+                    upperNeighbor = s.v;
+                }
+            }
+
+            const minVal = lowerNeighbor !== null ? lowerNeighbor + MIN_GAP : MIN_GAP;
+            const maxVal = upperNeighbor !== null ? upperNeighbor - MIN_GAP : Math.round(innerHeight - MIN_GAP);
+
+            return { minVal: Math.max(MIN_GAP, minVal), maxVal: Math.min(Math.round(innerHeight - MIN_GAP), maxVal) };
+        }
+
+        function stepCustomPos(idx, delta) {
+            const input = document.getElementById('customPosInput-' + idx);
+            if (!input) return;
+            let newVal = (parseInt(input.value) || 0) + delta;
+            const bounds = getCustomPosBounds(idx);
+            if (newVal < bounds.minVal) newVal = bounds.minVal;
+            if (newVal > bounds.maxVal) newVal = bounds.maxVal;
+            input.value = newVal;
+            onCustomPosInput(idx);
+        }
+
+        function onCustomPosInput(idx) {
+            const input = document.getElementById('customPosInput-' + idx);
+            if (!input) return;
+            let val = parseInt(input.value) || 0;
+
+            // Najpierw zapisz wartość żeby getCustomPosBounds działał na aktualnych danych
+            customPositions[idx] = val;
+
+            // Clamp do zakresu tej półki (uwzględnia sąsiadów)
+            const bounds = getCustomPosBounds(idx);
+            if (val < bounds.minVal) val = bounds.minVal;
+            if (val > bounds.maxVal) val = bounds.maxVal;
+
+            customPositions[idx] = val;
+            input.value = val;
+            validateCustomPositions();
+            updateOrderSummary();
+        }
+
+        function validateCustomPositions() {
+            const height = parseInt(heightSelect.value) || 60;
+            const innerHeight = height - 3.6;
+            const MIN_GAP = 11;
+            const sorted = [...customPositions].sort((a, b) => a - b);
+            const errorEl = document.getElementById('customPositionError');
+            let errors = [];
+
+            for (let i = 0; i < sorted.length; i++) {
+                const pos = sorted[i];
+                const stepper = document.getElementById('stepper-' + i);
+                const statusEl = document.getElementById('status-' + i);
+
+                // Check bounds
+                if (pos < MIN_GAP) {
+                    errors.push(`Półka ${i+1}: min. ${MIN_GAP} cm od dołu`);
+                    if (stepper) stepper.classList.add('invalid'); if (stepper) stepper.classList.remove('valid');
+                    if (statusEl) { statusEl.textContent = `min. ${MIN_GAP} cm`; statusEl.className = 'custom-pos-row-invalid'; }
+                    continue;
+                }
+                if (pos > innerHeight - MIN_GAP) {
+                    errors.push(`Półka ${i+1}: za wysoko (max. ${Math.round(innerHeight - MIN_GAP)} cm)`);
+                    if (stepper) stepper.classList.add('invalid'); if (stepper) stepper.classList.remove('valid');
+                    if (statusEl) { statusEl.textContent = `max ${Math.round(innerHeight - MIN_GAP)} cm`; statusEl.className = 'custom-pos-row-invalid'; }
+                    continue;
+                }
+                // Check gap from previous
+                if (i > 0 && pos - sorted[i-1] < MIN_GAP) {
+                    errors.push(`Półka ${i+1}: za mało miejsca (min. ${MIN_GAP} cm odstępu)`);
+                    if (stepper) stepper.classList.add('invalid'); if (stepper) stepper.classList.remove('valid');
+                    if (statusEl) { statusEl.textContent = `↕ min. ${MIN_GAP} cm`; statusEl.className = 'custom-pos-row-invalid'; }
+                    continue;
+                }
+                if (stepper) { stepper.classList.remove('invalid'); stepper.classList.add('valid'); }
+                if (statusEl) { statusEl.textContent = '✓'; statusEl.className = 'custom-pos-row-valid'; }
+            }
+
+            if (errorEl) {
+                if (errors.length > 0) {
+                    errorEl.textContent = errors[0];
+                    errorEl.style.display = 'block';
+                } else {
+                    errorEl.style.display = 'none';
+                }
+            }
+            return errors.length === 0;
+        }
+
+        function isCustomPositionValid() {
+            if (!customPositionEnabled) return true;
+            return validateCustomPositions();
+        }
+
+        function getCustomPositionSummary() {
+            // Obsługa obu systemów
+            const enabled = customShelfPositionEnabled || customPositionEnabled;
+            const positions = customShelfPositionEnabled ? customShelfPositions : customPositions;
+            if (!enabled || positions.length === 0) return null;
+            
+            const sorted = [...positions].sort((a, b) => a - b);
+            const height = parseInt(heightSelect.value) || 60;
+            const thickness = 1.8;
+            const innerHeight = height - 2 * thickness;
+            
+            // Oblicz odległości między elementami (wolna przestrzeń)
+            const distances = [];
+            distances.push(Math.round(sorted[0] - thickness / 2));
+            for (let i = 0; i < sorted.length - 1; i++) {
+                distances.push(Math.round(sorted[i+1] - sorted[i] - thickness));
+            }
+            distances.push(Math.round(innerHeight - sorted[sorted.length - 1] - thickness / 2));
+            
+            return { distances, positions: sorted, fee: 50 };
+        }
+
+        function updateCustomPositionToggleVisibility() {
+            const wrap = document.getElementById('customPositionToggleWrap');
+            if (!wrap) return;
+            const height = heightSelect ? parseInt(heightSelect.value) : 0;
+            const shelfType = shelfTypeSelect ? shelfTypeSelect.value : '';
+            const count = shelfCountSelect ? parseInt(shelfCountSelect.value) : 0;
+            const show = (height === 60 || height === 80) && shelfType !== 'mug_shelf' && shelfType !== 'modular' && count >= 2;
+            wrap.style.display = show ? 'block' : 'none';
+            if (!show && customPositionEnabled) {
+                document.getElementById('customPositionToggle').checked = false;
+                handleCustomPositionToggle();
+            }
+        }
+
+
+        // ===== WŁASNE ROZMIESZCZENIE PÓŁEK =====
+        let customShelfPositionEnabled = false;
+        let customShelfPositions = []; // wartości w cm od dołu
+
+        function toggleCustomShelfPosition() {
+            customShelfPositionEnabled = !customShelfPositionEnabled;
+            const sw = document.getElementById('customShelfSwitch');
+            const panel = document.getElementById('customShelfPositionPanel');
+            const card = document.querySelector('.csp-card');
+            if (!sw || !panel) return;
+
+            if (customShelfPositionEnabled) {
+                sw.classList.add('on');
+                if (card) card.classList.add('active');
+                panel.style.display = 'block';
+                buildCustomShelfInputs();
+                autoRotateEnabled = false;
+                userStoppedRotation = true;
+                setTimeout(updateDimensionOverlay, 100);
+                const rBtn = document.getElementById('rotateToggleBtn');
+                const ip = document.getElementById('rotateIconPause');
+                const ipl = document.getElementById('rotateIconPlay');
+                if (rBtn && ip && ipl) { rBtn.classList.add('paused'); ip.style.display = 'none'; ipl.style.display = ''; }
+
+                // Mobile: otwórz 3D i przewiń żeby widać rozmieszczenie + 3D
+                if (window.innerWidth < 768) {
+                    if (shelfContainer && !shelfContainer.classList.contains('active')) {
+                        if (typeof open3dPanel === 'function') open3dPanel();
+                    }
+                    setTimeout(() => {
+                        const target = document.getElementById('customShelfPositionWrapper');
+                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
+                }
+            } else {
+                sw.classList.remove('on');
+                if (card) card.classList.remove('active');
+                panel.style.display = 'none';
+                customShelfPositions = [];
+                autoRotateEnabled = true;
+                userStoppedRotation = false;
+                const rBtn = document.getElementById('rotateToggleBtn');
+                const ip = document.getElementById('rotateIconPause');
+                const ipl = document.getElementById('rotateIconPlay');
+                if (rBtn && ip && ipl) { rBtn.classList.remove('paused'); ip.style.display = ''; ipl.style.display = 'none'; }
+            }
+            updatePreview();
+            updateOrderSummary();
+        }
+
+        function buildCustomShelfInputs() {
+            const container = document.getElementById('customShelfInputs');
+            if (!container) return;
+            const count = parseInt(shelfCountSelect.value) || 0;
+            const height = parseInt(heightSelect.value) || 60;
+            const innerHeight = height - 3.6;
+
+            container.innerHTML = '';
+            container.className = 'csp-steppers';
+            customShelfPositions = [];
+
+            for (let i = 1; i <= count; i++) {
+                const defaultPos = Math.round((innerHeight / (count + 1)) * i);
+                customShelfPositions.push(defaultPos);
+            }
+
+            for (let i = 0; i < count; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'csp-stepper-cell';
+                cell.id = 'stepper-' + i;
+                cell.innerHTML = `
+                    <button class="s-btn" onclick="stepperChange(${i}, -1)" type="button" title="Niżej">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+                    </button>
+                    <span class="csp-stepper-label">${i + 1}</span>
+                    <input type="hidden" id="shelfPos-${i}" value="${customShelfPositions[i]}">
+                    <button class="s-btn" onclick="stepperChange(${i}, 1)" type="button" title="Wyżej">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
+                    </button>
+                `;
+                container.appendChild(cell);
+            }
+            validateCustomShelfPositions();
+        }
+
+        function getShelfBounds(idx) {
+            const height = parseInt(heightSelect.value) || 60;
+            const innerHeight = height - 3.6;
+            const MIN_GAP = 11;
+            const count = customShelfPositions.length;
+
+            // Zbierz pozycje INNYCH półek (bez aktualnie edytowanej)
+            const others = customShelfPositions
+                .map((v, i) => ({ v, i }))
+                .filter(s => s.i !== idx)
+                .sort((a, b) => a.v - b.v);
+
+            // Znajdź sąsiadów: dolny i górny
+            let lowerNeighbor = null;
+            let upperNeighbor = null;
+            for (const s of others) {
+                if (s.v <= customShelfPositions[idx]) {
+                    lowerNeighbor = s.v;
+                } else if (upperNeighbor === null) {
+                    upperNeighbor = s.v;
+                }
+            }
+
+            const minVal = lowerNeighbor !== null ? lowerNeighbor + MIN_GAP : MIN_GAP;
+            const maxVal = upperNeighbor !== null ? upperNeighbor - MIN_GAP : Math.round(innerHeight - MIN_GAP);
+
+            return { minVal: Math.max(MIN_GAP, minVal), maxVal: Math.min(Math.round(innerHeight - MIN_GAP), maxVal) };
+        }
+
+        function stepperChange(idx, delta) {
+            const input = document.getElementById('shelfPos-' + idx);
+            if (!input) return;
+            let val = parseInt(input.value) || 0;
+            val += delta;
+
+            // Clamp do zakresu półki
+            const bounds = getShelfBounds(idx);
+            if (val < bounds.minVal) val = bounds.minVal;
+            if (val > bounds.maxVal) val = bounds.maxVal;
+
+            input.value = val;
+            stepperInput(idx);
+        }
+
+        function stepperInput(idx) {
+            const input = document.getElementById('shelfPos-' + idx);
+            const display = document.getElementById('shelfPosDisplay-' + idx);
+            if (!input) return;
+            let val = parseInt(input.value) || 0;
+
+            // Najpierw zapisz wartość żeby getShelfBounds działał na aktualnych danych
+            customShelfPositions[idx] = val;
+
+            // Clamp do zakresu tej półki (uwzględnia sąsiadów)
+            const bounds = getShelfBounds(idx);
+            if (val < bounds.minVal) val = bounds.minVal;
+            if (val > bounds.maxVal) val = bounds.maxVal;
+
+            customShelfPositions[idx] = val;
+            input.value = val;
+            if (display) display.textContent = val + ' cm';
+            validateCustomShelfPositions();
+            updatePreview();
+            updateOrderSummary();
+        }
+
+        function validateCustomShelfPositions() {
+            const height = parseInt(heightSelect.value) || 60;
+            const innerHeight = height - 3.6;
+            const MIN_GAP = 11;
+            const errorEl = document.getElementById('customShelfError');
+            let allOk = true;
+            let errorMsg = '';
+
+            const sorted = [...customShelfPositions].map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+
+            for (let i = 0; i < customShelfPositions.length; i++) {
+                const stepper = document.getElementById('stepper-' + i);
+                const val = customShelfPositions[i];
+                let rowOk = true;
+
+                if (val < MIN_GAP) { rowOk = false; }
+                else if (val > Math.round(innerHeight - MIN_GAP)) { rowOk = false; }
+
+                if (stepper) {
+                    stepper.classList.remove('error', 'ok');
+                    stepper.classList.add(rowOk ? 'ok' : 'error');
+                }
+                if (!rowOk) allOk = false;
+            }
+
+            // Check gaps between shelves
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const gap = sorted[i + 1].v - sorted[i].v;
+                if (gap < MIN_GAP) {
+                    allOk = false;
+                    errorMsg = `Za mały odstęp między półką ${sorted[i].i + 1} a ${sorted[i + 1].i + 1} (${gap} cm). Min. ${MIN_GAP} cm.`;
+                    const s1 = document.getElementById('stepper-' + sorted[i].i);
+                    const s2 = document.getElementById('stepper-' + sorted[i + 1].i);
+                    if (s1) { s1.classList.remove('ok'); s1.classList.add('error'); }
+                    if (s2) { s2.classList.remove('ok'); s2.classList.add('error'); }
+                }
+            }
+
+            if (errorEl) {
+                if (!allOk && errorMsg) { errorEl.textContent = errorMsg; errorEl.style.display = 'block'; }
+                else errorEl.style.display = 'none';
+            }
+            return allOk;
+        }
+
+        function isCustomShelfValid() {
+            if (!customShelfPositionEnabled) return true;
+            return validateCustomShelfPositions();
+        }
+
+        function showOrHideCustomShelfToggle() {
+            const wrapper = document.getElementById('customShelfPositionWrapper');
+            const height = heightSelect ? parseInt(heightSelect.value) : 0;
+            const shelfType = shelfTypeSelect ? shelfTypeSelect.value : '';
+            const count = shelfCountSelect ? parseInt(shelfCountSelect.value) : 0;
+            const show = (height >= 60) && shelfType !== 'mug_shelf' && shelfType !== 'modular' && count >= 2;
+            if (wrapper) wrapper.style.display = show ? 'block' : 'none';
+            if (!show && customShelfPositionEnabled) {
+                customShelfPositionEnabled = false;
+                const sw = document.getElementById('customShelfSwitch');
+                const panel = document.getElementById('customShelfPositionPanel');
+                if (sw) sw.classList.remove('on');
+                if (panel) panel.style.display = 'none';
+                customShelfPositions = [];
+            }
+        }
+
+        function showShelfCountHint(availableMax) {
+            const hint = document.getElementById('shelfCountHint');
+            const hintText = document.getElementById('shelfCountHintText');
+            const section = document.getElementById('shelfCountSection');
+            if (!hint || !section) return;
+
+            if (availableMax <= 2) {
+                hint.style.display = 'none';
+                return;
+            }
+
+            // Ustaw tekst podpowiedzi
+            const labels = { 3: 'trzy', 4: 'cztery', 5: 'pięć' };
+            hintText.textContent = '✨ Możesz wybrać aż ' + (labels[availableMax] || availableMax) + ' półki wewnętrzne!';
+            hint.style.display = 'flex';
+
+            // Puls sekcji
+            section.classList.remove('shelf-section-pulse');
+            void section.offsetWidth;
+            section.classList.add('shelf-section-pulse');
+            setTimeout(() => section.classList.remove('shelf-section-pulse'), 2000);
+
+            // Na mobile — scroll do sekcji
+            if (window.innerWidth < 768) {
+                setTimeout(() => {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+
+            // Ukryj po 5 sekundach
+            clearTimeout(window._shelfHintTimer);
+            window._shelfHintTimer = setTimeout(() => {
+                hint.style.display = 'none';
+            }, 5000);
+        }
+
+        function updateShelfCountOptions() { const height = heightSelect.value; const shelfType = shelfTypeSelect.value; const currentValue = shelfCountSelect.value; let options = { '0': 'brak półek' }; if (!height || height === "" || shelfType === 'mug_shelf' || shelfType === 'modular') { shelfCountSelect.innerHTML = ''; if (!height || height === "") { const option = document.createElement('option'); option.value = '0'; option.textContent = 'brak półek'; shelfCountSelect.appendChild(option); shelfCountSelect.value = '0'; } return; } if (height === "40") options['2'] = '2 półki'; else if (height === "60") { options['2'] = '2 półki'; options['3'] = '3 półki'; } else if (height === "80") { options['2'] = '2 półki'; options['3'] = '3 półki'; options['4'] = '4 półki'; options['5'] = '5 półki'; } shelfCountSelect.innerHTML = ''; for (const value in options) { const option = document.createElement('option'); option.value = value; option.textContent = options[value]; shelfCountSelect.appendChild(option); } if (options.hasOwnProperty(currentValue)) { shelfCountSelect.value = currentValue; } else { shelfCountSelect.value = '0'; } const maxOpt = Math.max(...Object.keys(options).map(Number).filter(n => !isNaN(n))); showShelfCountHint(maxOpt); updateCustomPositionToggleVisibility(); if (customPositionEnabled) { buildCustomPositionInputs(); } }
         function checkCustomWidth() { const isCustom = widthSelect.value === 'custom'; if(customWidthInput && customWidthDisplay && customWidthFee) { customWidthInput.style.display = isCustom ? 'block' : 'none'; customWidthDisplay.style.display = isCustom ? 'inline' : 'none'; customWidthFee.style.display = isCustom ? 'inline' : 'none'; if (isCustom) { customWidthDisplay.textContent = customWidthInput.value + ' cm'; } } handleDimensionChange(); }
-        function handleDimensionChange() { if (shelfTypeSelect.value !== 'mug_shelf') { updateDepthOptions(); updateShelfCountOptions(); } updatePreview(); updateOrderSummary(); }
+        function handleDimensionChange() { if (shelfTypeSelect.value !== 'mug_shelf') { updateDepthOptions(); updateShelfCountOptions(); } updateCustomPositionToggleVisibility(); updatePreview(); updateOrderSummary(); }
         function handleMugShelfHeightChange(isLoading = false) { const height = heightSelect.value; if (shelfCountSelect && mugShelfDividersOptionsDiv) { if (height === '60') { shelfCountSelect.innerHTML = '<option value="3">3 półki (stałe)</option>'; shelfCountSelect.value = '3'; mugShelfDividersOptionsDiv.style.display = 'block'; } else if (height === '40') { shelfCountSelect.innerHTML = '<option value="2">2 półki (stałe)</option>'; shelfCountSelect.value = '2'; mugShelfDividersOptionsDiv.style.display = 'block'; } else { shelfCountSelect.innerHTML = '<option value="">-- Wybierz --</option>'; shelfCountSelect.value = ''; mugShelfDividersOptionsDiv.style.display = 'none'; } if (!isLoading) { if(dividersTopCheckbox) dividersTopCheckbox.checked = false; if(dividersMiddleCheckbox) dividersMiddleCheckbox.checked = false; if(dividersBottomCheckbox) dividersBottomCheckbox.checked = false; } } if (!isLoading) { updatePreview(); updateOrderSummary(); } }
         
       function handleShelfTypeChange(isLoading = false) {
@@ -1256,14 +2156,201 @@ function updateModularIconActiveStates() {
         
        function handleMugShelfWidthChange() { const currentMugShelfWidth = widthSelect.value; let heightChangedProgrammatically = false; if (shelfTypeSelect && shelfTypeSelect.value === 'mug_shelf' && widthSelect && heightSelect) { const sixtyCmHeightOption = Array.from(heightSelect.options).find(opt => opt.value === '60'); const fortyCmHeightOption = Array.from(heightSelect.options).find(opt => opt.value === '40'); if (currentMugShelfWidth === '84') { if (sixtyCmHeightOption) { sixtyCmHeightOption.disabled = true; sixtyCmHeightOption.style.textDecoration = 'line-through'; sixtyCmHeightOption.style.color = '#999'; } if (heightSelect.value === '60' && sixtyCmHeightOption && sixtyCmHeightOption.disabled) { if (fortyCmHeightOption && !fortyCmHeightOption.disabled) { heightSelect.value = '40'; heightChangedProgrammatically = true; } } } else { if (sixtyCmHeightOption) { sixtyCmHeightOption.disabled = false; sixtyCmHeightOption.style.textDecoration = ''; sixtyCmHeightOption.style.color = ''; } } } if (heightChangedProgrammatically && typeof handleMugShelfHeightChange === "function") { handleMugShelfHeightChange(); } if(dividersTopCheckbox) dividersTopCheckbox.checked = false; if(dividersMiddleCheckbox) dividersMiddleCheckbox.checked = false; if(dividersBottomCheckbox) dividersBottomCheckbox.checked = false; updatePreview(true); updateOrderSummary(); }
         function restoreDimensionControls() { widthSelect.innerHTML = '<option value="">-- Wybierz --</option>'; originalWidthOptions.forEach(opt => widthSelect.add(new Option(opt.text, opt.value))); widthSelect.value = ""; widthSelect.removeEventListener('change', handleMugShelfWidthChange); widthSelect.removeEventListener('change', checkCustomWidth); widthSelect.addEventListener('change', checkCustomWidth); if(customWidthInput && customWidthDisplay && customWidthFee) { customWidthInput.style.display = 'none'; customWidthDisplay.style.display = 'none'; customWidthFee.style.display = 'none'; } heightSelect.innerHTML = '<option value="">-- Wybierz --</option>'; originalHeightOptions.forEach(opt => heightSelect.add(new Option(opt.text, opt.value))); heightSelect.value = ""; heightSelect.disabled = false; if(heightLabel) heightLabel.classList.remove('text-stone-400'); depthSelect.innerHTML = '<option value="">-- Wybierz --</option>'; depthSelect.value = ""; depthSelect.disabled = false; if(depthLabel) depthLabel.classList.remove('text-stone-400'); shelfCountSelect.innerHTML = '<option value="">-- Wybierz --</option>'; shelfCountSelect.value = ""; shelfCountSelect.disabled = false; heightSelect.removeEventListener('change', handleMugShelfHeightChange); heightSelect.removeEventListener('change', handleDimensionChange); heightSelect.addEventListener('change', handleDimensionChange); }
-        function init3D() { const container = threeJsCanvasWrapper; if (!container) { console.error("Three.js canvas wrapper (#threeJsCanvasWrapper) not found."); return; } scene = new THREE.Scene(); scene.background = new THREE.Color(0xf0f0f0); camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000); camera.position.set(initialCameraPosition.x, initialCameraPosition.y, initialCameraPosition.z); renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(container.clientWidth, container.clientHeight); container.innerHTML = ''; container.appendChild(renderer.domElement); scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1)); const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6); directionalLight.position.set(4, 8, 3); scene.add(directionalLight); controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.target.set(0, 0, 0); if (controls) { controls.addEventListener('start', () => { autoRotateEnabled = false; }); controls.addEventListener('end', () => { if (shelfTypeSelect && shelfTypeSelect.value !== 'mug_shelf' && shelfTypeSelect.value !== 'modular') { autoRotateEnabled = true; } else { autoRotateEnabled = false; } }); } window.addEventListener('resize', onWindowResize, false); updatePreview(true); animate(); }
+
+
+        function updateDimensionOverlay() {
+            // Wyczyść dimensionGroup
+            if (!dimensionGroup) return;
+            while (dimensionGroup.children.length) {
+                const c = dimensionGroup.children[0];
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) { if (c.material.map) c.material.map.dispose(); c.material.dispose(); }
+                dimensionGroup.remove(c);
+            }
+            // Wyczyść HTML etykiety
+            let labelsContainer = document.getElementById('dimLabelsContainer');
+            if (!labelsContainer) {
+                labelsContainer = document.createElement('div');
+                labelsContainer.id = 'dimLabelsContainer';
+                labelsContainer.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:30;overflow:hidden;';
+                const wrapper = document.getElementById('threeJsCanvasWrapper');
+                if (wrapper) { wrapper.style.position = 'relative'; wrapper.appendChild(labelsContainer); }
+            }
+            labelsContainer.innerHTML = '';
+
+            if (!customShelfPositionEnabled || !shelfGroup || !renderer || !camera) return;
+
+            const shelves = [];
+            shelfGroup.traverse(c => { if (c.name && c.name.startsWith('internalShelf_')) shelves.push(c); });
+            shelves.sort((a, b) => {
+                const wa = new THREE.Vector3(); a.getWorldPosition(wa);
+                const wb = new THREE.Vector3(); b.getWorldPosition(wb);
+                return wa.y - wb.y;
+            });
+            if (shelves.length === 0) return;
+
+            const thickness = 0.18;
+            const bottomMesh = shelfGroup.getObjectByName('bottomPanel');
+            const topMesh = shelfGroup.getObjectByName('topPanel');
+
+            function getWorldY(mesh, localOffsetY) {
+                const v = new THREE.Vector3(0, localOffsetY, 0);
+                mesh.localToWorld(v);
+                return v.y;
+            }
+
+            function toScreen(wx, wy, wz) {
+                const canvasEl = renderer.domElement;
+                const v = new THREE.Vector3(wx, wy, wz);
+                v.project(camera);
+                return {
+                    x: (v.x + 1) / 2 * canvasEl.clientWidth,
+                    y: (-v.y + 1) / 2 * canvasEl.clientHeight
+                };
+            }
+
+            const bY = bottomMesh ? getWorldY(bottomMesh, thickness / 2) : (() => { const v = new THREE.Vector3(); shelfGroup.getWorldPosition(v); return v.y - parseFloat(heightSelect.value) / 20; })();
+            const tY = topMesh ? getWorldY(topMesh, -thickness / 2) : (() => { const v = new THREE.Vector3(); shelfGroup.getWorldPosition(v); return v.y + parseFloat(heightSelect.value) / 20; })();
+
+            // Zbierz granice
+            const gaps = [];
+            let prevY = bY;
+            shelves.forEach(s => {
+                const sBot = getWorldY(s, -thickness / 2);
+                const sTop = getWorldY(s, thickness / 2);
+                gaps.push({ y1: prevY, y2: sBot });
+                prevY = sTop;
+            });
+            gaps.push({ y1: prevY, y2: tY });
+
+            // Wewnętrzna krawędź prawego boku — wewnątrz półki
+            const shelfWidth = (parseFloat(widthSelect.value) || 44) / 10;
+            const localRight = new THREE.Vector3(shelfWidth / 2 - 0.18, 0, 0);
+            shelfGroup.localToWorld(localRight);
+            const xW = localRight.x;
+            const zW = localRight.z;
+
+            const col = 0x16a34a;
+            const matLine = new THREE.LineBasicMaterial({ color: col, depthTest: false, depthWrite: false });
+            const matFill = new THREE.MeshBasicMaterial({ color: col, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
+
+            const groupScale = shelfGroup.scale.y || 1;
+
+            gaps.forEach((gap, idx) => {
+                const gapCm = Math.round(Math.abs(gap.y2 - gap.y1) / groupScale * 10);
+                if (gapCm < 3) return;
+                const y1 = gap.y1, y2 = gap.y2;
+                const midY = (y1 + y2) / 2;
+                const pad = Math.min(0.05, (y2 - y1) * 0.08);
+                const arr = Math.min(0.08, (y2 - y1) * 0.12);
+
+                // Linia pionowa
+                const lg = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xW, y1 + pad + arr, zW),
+                    new THREE.Vector3(xW, y2 - pad - arr, zW)
+                ]);
+                const line = new THREE.Line(lg, matLine.clone());
+                line.renderOrder = 100;
+                dimensionGroup.add(line);
+
+                // Ticki poziome
+                const tickLen = 0.06;
+                [y1, y2].forEach(y => {
+                    const tg = new THREE.BufferGeometry().setFromPoints([
+                        new THREE.Vector3(xW - tickLen, y, zW),
+                        new THREE.Vector3(xW + tickLen, y, zW)
+                    ]);
+                    const tl = new THREE.Line(tg, matLine.clone());
+                    tl.renderOrder = 100;
+                    dimensionGroup.add(tl);
+                });
+
+                // Strzałka góra
+                const ag = new THREE.BufferGeometry();
+                ag.setAttribute('position', new THREE.Float32BufferAttribute([
+                    xW, y2 - pad, zW,
+                    xW - arr * 0.55, y2 - pad - arr, zW,
+                    xW + arr * 0.55, y2 - pad - arr, zW
+                ], 3));
+                dimensionGroup.add(Object.assign(new THREE.Mesh(ag, matFill.clone()), { renderOrder: 101 }));
+
+                // Strzałka dół
+                const adg = new THREE.BufferGeometry();
+                adg.setAttribute('position', new THREE.Float32BufferAttribute([
+                    xW, y1 + pad, zW,
+                    xW - arr * 0.55, y1 + pad + arr, zW,
+                    xW + arr * 0.55, y1 + pad + arr, zW
+                ], 3));
+                dimensionGroup.add(Object.assign(new THREE.Mesh(adg, matFill.clone()), { renderOrder: 101 }));
+
+                // HTML etykieta — rzutuj środek na ekran
+                const sp = toScreen(xW, midY, zW);
+                const label = document.createElement('div');
+                label.style.cssText = `
+                    position:absolute;
+                    left:${sp.x - 10}px;
+                    top:${sp.y}px;
+                    transform:translate(-100%, -50%);
+                    background:rgba(240,253,244,0.97);
+                    border:2px solid #16a34a;
+                    border-radius:6px;
+                    padding:3px 9px;
+                    font:bold 14px Arial,sans-serif;
+                    color:#14532d;
+                    white-space:nowrap;
+                    box-shadow:0 1px 4px rgba(0,0,0,0.12);
+                `;
+                label.textContent = gapCm + ' cm';
+                labelsContainer.appendChild(label);
+            });
+        }
+
+        function toggleAutoRotate() {
+            const btn = document.getElementById('rotateToggleBtn');
+            const iconPause = document.getElementById('rotateIconPause');
+            const iconPlay = document.getElementById('rotateIconPlay');
+            if (!btn) return;
+
+            autoRotateEnabled = !autoRotateEnabled;
+            userStoppedRotation = !autoRotateEnabled;
+
+            if (autoRotateEnabled) {
+                btn.classList.remove('paused');
+                iconPause.style.display = '';
+                iconPlay.style.display = 'none';
+                btn.title = 'Zatrzymaj obracanie';
+            } else {
+                btn.classList.add('paused');
+                iconPause.style.display = 'none';
+                iconPlay.style.display = '';
+                btn.title = 'Wznów obracanie';
+            }
+        }
+
+        function positionRotateBtn() {
+            const btn = document.getElementById('rotateToggleBtn');
+            const canvas = document.getElementById('threeJsCanvasWrapper');
+            if (!btn || !canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) {
+                btn.classList.remove('visible');
+                return;
+            }
+            btn.style.bottom = (window.innerHeight - rect.bottom + 10) + 'px';
+            btn.style.right = (window.innerWidth - rect.right + 10) + 'px';
+            btn.classList.add('visible');
+        }
+
+        function init3D() { const container = threeJsCanvasWrapper; if (!container) { console.error("Three.js canvas wrapper (#threeJsCanvasWrapper) not found."); return; } scene = new THREE.Scene(); scene.background = new THREE.Color(0xf0f0f0); dimensionGroup = new THREE.Group(); dimensionGroup.name = "dimensionGroup"; scene.add(dimensionGroup); camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000); camera.position.set(initialCameraPosition.x, initialCameraPosition.y, initialCameraPosition.z); renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(container.clientWidth, container.clientHeight); container.innerHTML = ''; container.style.position = 'relative'; container.appendChild(renderer.domElement); const _rBtn = document.createElement('button'); _rBtn.id = 'rotateToggleBtn'; _rBtn.className = 'rotate-toggle-btn'; _rBtn.title = 'Zatrzymaj/wznów obracanie'; _rBtn.onclick = toggleAutoRotate; _rBtn.innerHTML = '<svg id="rotateIconPause" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg><svg id="rotateIconPlay" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3l14 9-14 9V3z"/></svg>'; container.appendChild(_rBtn); scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1)); const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6); directionalLight.position.set(4, 8, 3); scene.add(directionalLight); controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.target.set(0, 0, 0); if (controls) { controls.addEventListener('start', () => { userStoppedRotation = true; autoRotateEnabled = false; }); controls.addEventListener('end', () => { const btn=document.getElementById('rotateToggleBtn'); const ip=document.getElementById('rotateIconPause'); const ipl=document.getElementById('rotateIconPlay'); if(btn&&ip&&ipl){if(autoRotateEnabled){btn.classList.remove('paused');ip.style.display='';ipl.style.display='none';}else{btn.classList.add('paused');ip.style.display='none';ipl.style.display='';}} }); } window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener('resize', positionRotateBtn, false); updatePreview(true); animate(); setTimeout(positionRotateBtn, 100); }
         function onWindowResize() { const container = threeJsCanvasWrapper; if (!camera || !renderer || !container) return; const width = container.clientWidth; const height = container.clientHeight; if (width > 0 && height > 0) { camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height); } else { console.warn("Skipping resize for 3D canvas wrapper with zero dimensions."); } updateDividerIconsVisibility(); updateModularIconsVisibility(); }
         function animate() {
             requestAnimationFrame(animate);
             if (autoRotateEnabled && shelfGroup) {
-                shelfGroup.rotation.y -= 0.003; // ZMIANA: Zmniejszona wartość dla wolniejszego obrotu
+                shelfGroup.rotation.y -= 0.003;
             }
             if(controls) controls.update();
+            updateDimensionOverlay();
             if(renderer && scene && camera) renderer.render(scene, camera);
         }
         
@@ -1538,7 +2625,7 @@ function updateModularIconActiveStates() {
                     modularNoBottomShelf: document.getElementById("modularNoBottomShelf")?.checked
                 };
             } else {
-                config = { width: getCurrentWidth(), height: heightSelect.value, depth: depthSelect.value, shelfCount: shelfCountSelect.value, shelfType: shelfType, noTopShelf: document.getElementById("noTopShelf")?.checked, noBottomShelf: shelfType === "standing" && document.getElementById("noBottomShelf")?.checked, addDividersTop: shelfType === 'mug_shelf' && dividersTopCheckbox?.checked, addDividersMiddle: shelfType === 'mug_shelf' && dividersMiddleCheckbox?.checked, addDividersBottom: shelfType === 'mug_shelf' && dividersBottomCheckbox?.checked };
+                config = { width: getCurrentWidth(), height: heightSelect.value, depth: depthSelect.value, shelfCount: shelfCountSelect.value, shelfType: shelfType, noTopShelf: document.getElementById("noTopShelf")?.checked, noBottomShelf: shelfType === "standing" && document.getElementById("noBottomShelf")?.checked, addDividersTop: shelfType === 'mug_shelf' && dividersTopCheckbox?.checked, addDividersMiddle: shelfType === 'mug_shelf' && dividersMiddleCheckbox?.checked, addDividersBottom: shelfType === 'mug_shelf' && dividersBottomCheckbox?.checked, customPositions: (typeof customShelfPositionEnabled !== 'undefined' && customShelfPositionEnabled && customShelfPositions.length > 0) ? [...customShelfPositions] : null };
             }
 
             const isConfigValid = (shelfType === 'modular') 
@@ -1818,10 +2905,17 @@ function updateModularIconActiveStates() {
                     const gap = (totalAvailableHeight - targetShelfCount * thickness) / (targetShelfCount + 1);
                     let startY = bottomExists ? (-targetHeight / 2 + bottomThicknessActual) : (-targetHeight / 2);
                     
+                    const useCustomPos = config.customPositions && config.customPositions.length === targetShelfCount;
                     for (let i = 0; i < targetShelfCount; i++) {
                         const shelfName = `internalShelf_${i}`;
                         let shelf = shelfGroup.getObjectByName(shelfName);
-                        const targetY = startY + (i + 1) * gap + (i + 0.5) * thickness;
+                        let targetY;
+                        if (useCustomPos) {
+                            const bottomRef = bottomExists ? (-targetHeight / 2 + bottomThicknessActual) : (-targetHeight / 2);
+                            targetY = bottomRef + config.customPositions[i] / 10;
+                        } else {
+                            targetY = startY + (i + 1) * gap + (i + 0.5) * thickness;
+                        }
 
                         if (!shelf) {
                             shelf = new THREE.Mesh(new THREE.BoxGeometry(targetWidth - 2 * thickness, thickness, targetDepth), defaultMaterial);
@@ -1832,6 +2926,8 @@ function updateModularIconActiveStates() {
                             currentAnimationTimeline.to(shelf.scale, { x: (targetWidth - 2 * thickness) / shelf.geometry.parameters.width, z: targetDepth / shelf.geometry.parameters.depth, duration: animDuration }, 0);
                         }
                     }
+                    // Aktualizuj etykiety wymiarów
+                    setTimeout(() => updateDimensionOverlay(), animDuration * 1000 + 50);
                 }
             }
 
@@ -2028,7 +3124,114 @@ function updateModularIconActiveStates() {
             } 
             return mainGroup; 
         }
-        function buildShelfModel(config) { const group = new THREE.Group(); const { width: widthNum, height: heightVal, depth: depthVal, shelfCount: shelfCountVal, shelfType, noTopShelf, noBottomShelf, addDividersTop, addDividersMiddle, addDividersBottom } = config; if (!widthNum || !heightVal || !depthVal || shelfCountVal === undefined) return group; const defaultMaterial = new THREE.MeshStandardMaterial(originalPreviewMaterialParams); const thickness = 0.18; const width = widthNum / 10; const height = parseFloat(heightVal) / 10; const depth = parseFloat(depthVal) / 10; const shelfCount = parseInt(shelfCountVal); if (isNaN(width) || isNaN(height) || isNaN(depth) || width <= 0 || height <= 0 || depth <= 0) return group; let topPanel, bottomPanel; if (!noBottomShelf) { const bottomGeometry = new THREE.BoxGeometry(width, thickness, depth); bottomPanel = new THREE.Mesh(bottomGeometry, defaultMaterial); bottomPanel.position.set(0, -height / 2 + thickness / 2, 0); bottomPanel.name = "bottomPanel"; group.add(bottomPanel); } if (!noTopShelf) { const topGeometry = new THREE.BoxGeometry(width, thickness, depth); topPanel = new THREE.Mesh(topGeometry, defaultMaterial); topPanel.position.set(0, height / 2 - thickness / 2, 0); topPanel.name = "topPanel"; group.add(topPanel); } const sideGeometry = new THREE.BoxGeometry(thickness, height, depth); const leftSideMesh = new THREE.Mesh(sideGeometry, defaultMaterial); leftSideMesh.position.set(-width / 2 + thickness / 2, 0, 0); leftSideMesh.name = "leftSide"; group.add(leftSideMesh); const rightSideMesh = new THREE.Mesh(sideGeometry, defaultMaterial); rightSideMesh.position.set(width / 2 - thickness / 2, 0, 0); rightSideMesh.name = "rightSide"; group.add(rightSideMesh); const internalShelves = []; if (!isNaN(shelfCount) && shelfCount > 0) { if (shelfType === 'mug_shelf' && heightVal === '60' && shelfCount === 3 && topPanel) { const fixedGap = 1.09; const topPanelBottomY = topPanel.position.y - thickness / 2; let lastShelfY = topPanelBottomY; for (let i = 0; i < shelfCount; i++) { const shelfY = lastShelfY - fixedGap - thickness / 2; const shelfGeometry = new THREE.BoxGeometry(width - 2 * thickness, thickness, depth); const shelfMesh = new THREE.Mesh(shelfGeometry, defaultMaterial); shelfMesh.position.set(0, shelfY, 0); shelfMesh.name = `internalShelf_${i}`; group.add(shelfMesh); internalShelves.push(shelfMesh); lastShelfY = shelfY - thickness / 2; } } else { const topExists = !!topPanel; const bottomExists = !!bottomPanel; const topThicknessActual = topExists ? thickness : 0; const bottomThicknessActual = bottomExists ? thickness : 0; const totalAvailableHeight = height - topThicknessActual - bottomThicknessActual; if (totalAvailableHeight >= shelfCount * thickness && (shelfCount + 1) > 0) { const gap = (totalAvailableHeight - shelfCount * thickness) / (shelfCount + 1); let startY = bottomExists ? (-height / 2 + bottomThicknessActual) : (-height / 2); for (let i = 1; i <= shelfCount; i++) { const shelfY = startY + i * gap + (i - 0.5) * thickness; const shelfGeometry = new THREE.BoxGeometry(width - 2 * thickness, thickness, depth); const shelfMesh = new THREE.Mesh(shelfGeometry, defaultMaterial); shelfMesh.position.set(0, shelfY, 0); shelfMesh.name = `internalShelf_${i-1}`; group.add(shelfMesh); internalShelves.push(shelfMesh); } } } } if (shelfType === 'mug_shelf' && topPanel && bottomPanel && internalShelves.length > 0) { if (addDividersTop || addDividersMiddle || addDividersBottom) { const innerWidthForDividers = width - 2 * thickness; const dividerThicknessThreeJs = thickness; let levels = []; internalShelves.sort((a, b) => a.position.y - b.position.y); if (heightVal === '60' && internalShelves.length === 3) { levels = [ { top: topPanel.position.y - thickness / 2, bottom: internalShelves[2].position.y + thickness/2 }, { top: internalShelves[2].position.y - thickness/2, bottom: internalShelves[1].position.y + thickness/2 }, { top: internalShelves[1].position.y - thickness/2, bottom: internalShelves[0].position.y + thickness/2 }, { top: internalShelves[0].position.y - thickness/2, bottom: bottomPanel.position.y + thickness / 2 } ]; } else if (heightVal === '40' && internalShelves.length === 2) { levels = [ { top: topPanel.position.y - thickness / 2, bottom: internalShelves[1].position.y + thickness/2 }, { top: internalShelves[1].position.y - thickness/2, bottom: internalShelves[0].position.y + thickness/2 }, { top: internalShelves[0].position.y - thickness/2, bottom: bottomPanel.position.y + thickness / 2 } ]; } const drawDividersForLevel = (levelData) => { const levelH = Math.max(0.01, levelData.top - levelData.bottom); if (levelH <= 0.01) return; const yCenter = levelData.bottom + levelH / 2; const dividerGeometry = new THREE.BoxGeometry(dividerThicknessThreeJs, levelH, depth); if (widthNum == 84) { const numPhysicalDividers = 3; const singleCompartmentWidth = 1.25; let currentXPos = -innerWidthForDividers / 2; for (let i = 0; i < numPhysicalDividers; i++) { currentXPos += singleCompartmentWidth; const dividerXCenter = currentXPos + (dividerThicknessThreeJs / 2); const dividerMesh = new THREE.Mesh(dividerGeometry.clone(), defaultMaterial); dividerMesh.position.set(dividerXCenter, yCenter, 0); dividerMesh.name = `divider_h84_${i}`; group.add(dividerMesh); currentXPos += dividerThicknessThreeJs; } } else { const numDividersOriginal = (widthNum == 60) ? 3 : ((widthNum == 44) ? 2 : 0); if (numDividersOriginal > 0) { const dividerSpacing = innerWidthForDividers / (numDividersOriginal + 1); for (let i = 1; i <= numDividersOriginal; i++) { const xPos = (-innerWidthForDividers / 2) + i * dividerSpacing; const dividerMesh = new THREE.Mesh(dividerGeometry.clone(), defaultMaterial); dividerMesh.position.set(xPos, yCenter, 0); dividerMesh.name = `divider_${i}`; group.add(dividerMesh); } } } }; if (addDividersTop && levels[0]) drawDividersForLevel(levels[0]); if (addDividersMiddle && levels[1]) drawDividersForLevel(levels[1]); if (addDividersBottom && levels[2]) drawDividersForLevel(levels[2]); } } return group; }
+
+        function addShelfDimensionArrows(group, internalShelves, bottomPanel, topPanel, thickness, width, height, depth) {
+            const sorted = [...internalShelves].sort((a, b) => a.position.y - b.position.y);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x16a34a, linewidth: 2 });
+            const arrowMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
+            // Pozycja wewnątrz półki – na wewnętrznej powierzchni prawego boku
+            const xPos = width / 2 - thickness;
+            // Z na przedniej krawędzi bocznego elementu (depth/2 = front face)
+            const zPos = depth ? depth / 2 + 0.01 : 0.01;
+
+            // Poziomy do zmierzenia: dół -> shelf[0], shelf[0]->shelf[1], ..., shelf[n]->góra
+            const levels = [];
+            const bottomY = bottomPanel ? bottomPanel.position.y + thickness / 2 : -height / 2;
+            const topY = topPanel ? topPanel.position.y - thickness / 2 : height / 2;
+            levels.push({ y1: bottomY, y2: sorted[0].position.y - thickness / 2 });
+            for (let i = 0; i < sorted.length - 1; i++) {
+                levels.push({ y1: sorted[i].position.y + thickness / 2, y2: sorted[i + 1].position.y - thickness / 2 });
+            }
+            levels.push({ y1: sorted[sorted.length - 1].position.y + thickness / 2, y2: topY });
+
+            levels.forEach((lvl, idx) => {
+                const gapCm = Math.round((lvl.y2 - lvl.y1) * 10);
+                if (gapCm <= 0) return;
+                const midY = (lvl.y1 + lvl.y2) / 2;
+                const lineLen = 0.12;
+
+                // Pionowa linia
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xPos, lvl.y1, zPos),
+                    new THREE.Vector3(xPos, lvl.y2, zPos)
+                ]);
+                group.add(new THREE.Line(lineGeo, lineMat));
+
+                // Poziome kreski na końcach
+                const tick1 = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xPos - lineLen / 2, lvl.y1, zPos),
+                    new THREE.Vector3(xPos + lineLen / 2, lvl.y1, zPos)
+                ]);
+                group.add(new THREE.Line(tick1, lineMat));
+                const tick2 = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xPos - lineLen / 2, lvl.y2, zPos),
+                    new THREE.Vector3(xPos + lineLen / 2, lvl.y2, zPos)
+                ]);
+                group.add(new THREE.Line(tick2, lineMat));
+
+                // Strzałki (małe trójkąty)
+                const arrowSize = 0.06;
+                const arrowUpGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xPos - arrowSize / 2, lvl.y2 - arrowSize, zPos),
+                    new THREE.Vector3(xPos, lvl.y2, zPos),
+                    new THREE.Vector3(xPos + arrowSize / 2, lvl.y2 - arrowSize, zPos)
+                ]);
+                group.add(new THREE.Line(arrowUpGeo, lineMat));
+                const arrowDownGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xPos - arrowSize / 2, lvl.y1 + arrowSize, zPos),
+                    new THREE.Vector3(xPos, lvl.y1, zPos),
+                    new THREE.Vector3(xPos + arrowSize / 2, lvl.y1 + arrowSize, zPos)
+                ]);
+                group.add(new THREE.Line(arrowDownGeo, lineMat));
+
+                // Tekst z wymiarem jako sprite (canvas texture)
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 48;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'rgba(240,253,244,0.92)';
+                ctx.beginPath(); ctx.roundRect(2, 6, 124, 36, 8); ctx.fill();
+                ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.roundRect(2, 6, 124, 36, 8); ctx.stroke();
+                ctx.fillStyle = '#15803d';
+                ctx.font = 'bold 22px Arial';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(gapCm + ' cm', 64, 24);
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.position.set(xPos - 0.30, midY, zPos + 0.02);
+                sprite.scale.set(0.45, 0.17, 1);
+                sprite.name = 'dimensionLabel_' + idx;
+                group.add(sprite);
+            });
+        }
+
+        function buildShelfModel(config) { const group = new THREE.Group(); const { width: widthNum, height: heightVal, depth: depthVal, shelfCount: shelfCountVal, shelfType, noTopShelf, noBottomShelf, addDividersTop, addDividersMiddle, addDividersBottom } = config; if (!widthNum || !heightVal || !depthVal || shelfCountVal === undefined) return group; const defaultMaterial = new THREE.MeshStandardMaterial(originalPreviewMaterialParams); const thickness = 0.18; const width = widthNum / 10; const height = parseFloat(heightVal) / 10; const depth = parseFloat(depthVal) / 10; const shelfCount = parseInt(shelfCountVal); if (isNaN(width) || isNaN(height) || isNaN(depth) || width <= 0 || height <= 0 || depth <= 0) return group; let topPanel, bottomPanel; if (!noBottomShelf) { const bottomGeometry = new THREE.BoxGeometry(width, thickness, depth); bottomPanel = new THREE.Mesh(bottomGeometry, defaultMaterial); bottomPanel.position.set(0, -height / 2 + thickness / 2, 0); bottomPanel.name = "bottomPanel"; group.add(bottomPanel); } if (!noTopShelf) { const topGeometry = new THREE.BoxGeometry(width, thickness, depth); topPanel = new THREE.Mesh(topGeometry, defaultMaterial); topPanel.position.set(0, height / 2 - thickness / 2, 0); topPanel.name = "topPanel"; group.add(topPanel); } const sideGeometry = new THREE.BoxGeometry(thickness, height, depth); const leftSideMesh = new THREE.Mesh(sideGeometry, defaultMaterial); leftSideMesh.position.set(-width / 2 + thickness / 2, 0, 0); leftSideMesh.name = "leftSide"; group.add(leftSideMesh); const rightSideMesh = new THREE.Mesh(sideGeometry, defaultMaterial); rightSideMesh.position.set(width / 2 - thickness / 2, 0, 0); rightSideMesh.name = "rightSide"; group.add(rightSideMesh); const internalShelves = []; if (!isNaN(shelfCount) && shelfCount > 0) { if (shelfType === 'mug_shelf' && heightVal === '60' && shelfCount === 3 && topPanel) { const fixedGap = 1.09; const topPanelBottomY = topPanel.position.y - thickness / 2; let lastShelfY = topPanelBottomY; for (let i = 0; i < shelfCount; i++) { const shelfY = lastShelfY - fixedGap - thickness / 2; const shelfGeometry = new THREE.BoxGeometry(width - 2 * thickness, thickness, depth); const shelfMesh = new THREE.Mesh(shelfGeometry, defaultMaterial); shelfMesh.position.set(0, shelfY, 0); shelfMesh.name = `internalShelf_${i}`; group.add(shelfMesh); internalShelves.push(shelfMesh); lastShelfY = shelfY - thickness / 2; } } else { const topExists = !!topPanel; const bottomExists = !!bottomPanel; const topThicknessActual = topExists ? thickness : 0; const bottomThicknessActual = bottomExists ? thickness : 0; const totalAvailableHeight = height - topThicknessActual - bottomThicknessActual; if (totalAvailableHeight >= shelfCount * thickness && (shelfCount + 1) > 0) {
+            // Użyj własnych pozycji z config jeśli dostępne
+            const useCustom = config.customPositions && config.customPositions.length === shelfCount;
+            if (useCustom) {
+                const bottomY = bottomExists ? (-height / 2 + bottomThicknessActual) : (-height / 2);
+                for (let i = 0; i < shelfCount; i++) {
+                    const posFromBottom = config.customPositions[i] / 10;
+                    const shelfY = bottomY + posFromBottom;
+                    const shelfGeometry = new THREE.BoxGeometry(width - 2 * thickness, thickness, depth);
+                    const shelfMesh = new THREE.Mesh(shelfGeometry, defaultMaterial);
+                    shelfMesh.position.set(0, shelfY, 0);
+                    shelfMesh.name = `internalShelf_${i}`;
+                    group.add(shelfMesh);
+                    internalShelves.push(shelfMesh);
+                }
+            } else {
+                const gap = (totalAvailableHeight - shelfCount * thickness) / (shelfCount + 1); let startY = bottomExists ? (-height / 2 + bottomThicknessActual) : (-height / 2); for (let i = 1; i <= shelfCount; i++) { const shelfY = startY + i * gap + (i - 0.5) * thickness; const shelfGeometry = new THREE.BoxGeometry(width - 2 * thickness, thickness, depth); const shelfMesh = new THREE.Mesh(shelfGeometry, defaultMaterial); shelfMesh.position.set(0, shelfY, 0); shelfMesh.name = `internalShelf_${i-1}`; group.add(shelfMesh); internalShelves.push(shelfMesh); }
+            }
+        } } } if (shelfType === 'mug_shelf' && topPanel && bottomPanel && internalShelves.length > 0) { if (addDividersTop || addDividersMiddle || addDividersBottom) { const innerWidthForDividers = width - 2 * thickness; const dividerThicknessThreeJs = thickness; let levels = []; internalShelves.sort((a, b) => a.position.y - b.position.y); if (heightVal === '60' && internalShelves.length === 3) { levels = [ { top: topPanel.position.y - thickness / 2, bottom: internalShelves[2].position.y + thickness/2 }, { top: internalShelves[2].position.y - thickness/2, bottom: internalShelves[1].position.y + thickness/2 }, { top: internalShelves[1].position.y - thickness/2, bottom: internalShelves[0].position.y + thickness/2 }, { top: internalShelves[0].position.y - thickness/2, bottom: bottomPanel.position.y + thickness / 2 } ]; } else if (heightVal === '40' && internalShelves.length === 2) { levels = [ { top: topPanel.position.y - thickness / 2, bottom: internalShelves[1].position.y + thickness/2 }, { top: internalShelves[1].position.y - thickness/2, bottom: internalShelves[0].position.y + thickness/2 }, { top: internalShelves[0].position.y - thickness/2, bottom: bottomPanel.position.y + thickness / 2 } ]; } const drawDividersForLevel = (levelData) => { const levelH = Math.max(0.01, levelData.top - levelData.bottom); if (levelH <= 0.01) return; const yCenter = levelData.bottom + levelH / 2; const dividerGeometry = new THREE.BoxGeometry(dividerThicknessThreeJs, levelH, depth); if (widthNum == 84) { const numPhysicalDividers = 3; const singleCompartmentWidth = 1.25; let currentXPos = -innerWidthForDividers / 2; for (let i = 0; i < numPhysicalDividers; i++) { currentXPos += singleCompartmentWidth; const dividerXCenter = currentXPos + (dividerThicknessThreeJs / 2); const dividerMesh = new THREE.Mesh(dividerGeometry.clone(), defaultMaterial); dividerMesh.position.set(dividerXCenter, yCenter, 0); dividerMesh.name = `divider_h84_${i}`; group.add(dividerMesh); currentXPos += dividerThicknessThreeJs; } } else { const numDividersOriginal = (widthNum == 60) ? 3 : ((widthNum == 44) ? 2 : 0); if (numDividersOriginal > 0) { const dividerSpacing = innerWidthForDividers / (numDividersOriginal + 1); for (let i = 1; i <= numDividersOriginal; i++) { const xPos = (-innerWidthForDividers / 2) + i * dividerSpacing; const dividerMesh = new THREE.Mesh(dividerGeometry.clone(), defaultMaterial); dividerMesh.position.set(xPos, yCenter, 0); dividerMesh.name = `divider_${i}`; group.add(dividerMesh); } } } }; if (addDividersTop && levels[0]) drawDividersForLevel(levels[0]); if (addDividersMiddle && levels[1]) drawDividersForLevel(levels[1]); if (addDividersBottom && levels[2]) drawDividersForLevel(levels[2]); } }
+
+        // Dodaj wymiary i strzałki jeśli włączone własne rozmieszczenie
+        if (config.customPositions && internalShelves.length > 0) {
+            addShelfDimensionArrows(group, internalShelves, bottomPanel, topPanel, thickness, width, height, depth);
+        }
+
+        return group; }
         function generate3dSnapshotFromCurrentModel() {
             return new Promise((resolve, reject) => {
                 if (!shelfGroup) {
@@ -2069,7 +3272,7 @@ function updateModularIconActiveStates() {
 
                 const snapshotRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
                 snapshotRenderer.setPixelRatio(window.devicePixelRatio);
-                snapshotRenderer.setSize(128, 128);
+                snapshotRenderer.setSize(256, 256);
         
                 setTimeout(() => {
                     try {
@@ -2129,7 +3332,7 @@ function updateModularIconActiveStates() {
             return null;
         }
         if (widthVal == 84) { if (dividersTopChecked) dividerFee += 33; if (dividersMiddleChecked) dividerFee += 33; if (dividersBottomChecked) dividerFee += 33; } else { let feePerDividerRow = 0; if (widthVal == 44) feePerDividerRow = 27; else if (widthVal == 60) feePerDividerRow = 40; if (feePerDividerRow > 0) { if (dividersTopChecked) dividerFee += feePerDividerRow; if (dividersMiddleChecked) dividerFee += feePerDividerRow; if (dividersBottomChecked) dividerFee += feePerDividerRow; } } 
-    } else { let baseWidthKey; const isCustomWidth = widthSelect.value === 'custom'; if (isCustomWidth) { if (isNaN(widthVal) || widthVal < 35 || widthVal > 59) return null; baseWidthKey = widthVal < 39 ? "34" : widthVal < 47 ? "44" : widthVal < 54 ? "50" : "60"; extraFee = 50; } else { baseWidthKey = String(widthVal); } if (pricing[baseWidthKey]?.[heightVal]?.[depthVal]?.[shelfCountVal] !== undefined) { basePrice = pricing[baseWidthKey][heightVal][depthVal][shelfCountVal]; } else { return null; } if (document.getElementById('noTopShelf')?.checked) deduction += 10; if (shelfType === 'standing' && document.getElementById('noBottomShelf')?.checked) deduction += 10; } if (basePrice === null) return null; const totalPrice = basePrice + extraFee + dividerFee - deduction; return { base: basePrice, extra: extraFee, divider: dividerFee, deduction: deduction, total: Math.max(50, totalPrice) }; }
+    } else { let baseWidthKey; const isCustomWidth = widthSelect.value === 'custom'; if (isCustomWidth) { if (isNaN(widthVal) || widthVal < 35 || widthVal > 59) return null; baseWidthKey = widthVal < 39 ? "34" : widthVal < 47 ? "44" : widthVal < 54 ? "50" : "60"; extraFee = 50; } else { baseWidthKey = String(widthVal); } if (pricing[baseWidthKey]?.[heightVal]?.[depthVal]?.[shelfCountVal] !== undefined) { basePrice = pricing[baseWidthKey][heightVal][depthVal][shelfCountVal]; } else { return null; } if (document.getElementById('noTopShelf')?.checked) deduction += 10; if (shelfType === 'standing' && document.getElementById('noBottomShelf')?.checked) deduction += 10; } if (basePrice === null) return null; const customPosFee = (typeof customShelfPositionEnabled !== 'undefined' && customShelfPositionEnabled) ? 50 : 0; const totalPrice = basePrice + extraFee + dividerFee + customPosFee - deduction; return { base: basePrice, extra: extraFee, divider: dividerFee, deduction: deduction, customPos: customPosFee, total: Math.max(50, totalPrice) }; }
         function updateSectionHighlights() {
             const sections = [shelfTypeSectionAnchor, dimensionSectionAnchor, colorSectionAnchor, shelfCountSection];
             const mugParent = mugShelfSpecificOptionsContainer ? mugShelfSpecificOptionsContainer.closest('.p-6.shadow.rounded-lg') : null;
@@ -2189,6 +3392,8 @@ function updateModularIconActiveStates() {
                 return;
             }
         }
+
+
 
 
         function updateOrderSummary() {
@@ -2312,12 +3517,33 @@ function updateModularIconActiveStates() {
     document.getElementById("gapSummaryDisplay").textContent = gT;
     const gapSummaryLi = document.getElementById("gapSummary")?.parentElement;
     const gapDisplayP = document.getElementById("gapDisplay");
-    if (currentShelfType === 'mug_shelf' || currentShelfType === 'modular') {
+    if (currentShelfType === 'mug_shelf' || currentShelfType === 'modular' || customShelfPositionEnabled) {
         if (gapSummaryLi) gapSummaryLi.style.display = 'none';
         if (gapDisplayP) gapDisplayP.style.display = 'none';
     } else {
         if (gapSummaryLi) gapSummaryLi.style.display = 'flex';
         if (gapDisplayP) gapDisplayP.style.display = 'block';
+    }
+    // Własne rozmieszczenie - podsumowanie
+    const customPosRow = document.getElementById('customPosSummaryRow');
+    const customPosSummaryEl = document.getElementById('customPosSummary');
+    if (customPosRow && customPosSummaryEl) {
+        const cps = typeof getCustomPositionSummary === 'function' ? getCustomPositionSummary() : null;
+        if (cps) {
+            const d = cps.distances;
+            let html = '<div style="font-size:12px;line-height:1.6">';
+            html += '<div style="color:#16a34a;font-weight:700;margin-bottom:4px">Własne rozmieszczenie <span style="background:#16a34a;color:#fff;padding:1px 6px;border-radius:10px;font-size:10px">+50 zł</span></div>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:4px 10px">';
+            for (let i = 0; i < d.length; i++) {
+                const label = i === 0 ? '↑ dół' : i === d.length - 1 ? '↑ góra' : `↕ ${i}–${i+1}`;
+                html += `<span style="color:#374151"><span style="color:#6b7280">${label}:</span> <b>${d[i]}</b> cm</span>`;
+            }
+            html += '</div></div>';
+            customPosSummaryEl.innerHTML = html;
+            customPosRow.style.display = 'flex';
+        } else {
+            customPosRow.style.display = 'none';
+        }
     }
     const o = [];
     if (currentShelfType === 'mug_shelf') {
@@ -2410,14 +3636,17 @@ function updateModularIconActiveStates() {
     const priceSummary = document.getElementById('priceSummary');
     const mainPageDiscountHint = document.getElementById('mainPageDiscountHint');
 
-    if (isComplete) {
-        const pD = computePriceDetailed();
-        if (pD !== null) {
-            priceAndActionsContainer.style.display = 'block';
-            priceHint.style.display = 'none';
+    // Cena pokazuje się zawsze gdy wymiary są wybrane (niezależnie od kolorów)
+    const pD = computePriceDetailed();
 
-            const originalPrice = pD.total;
-            const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (pD !== null) {
+        if (priceAndActionsContainer) priceAndActionsContainer.style.display = 'block';
+        if (priceHint) priceHint.style.display = 'none';
+
+        const originalPrice = pD.total;
+        const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        if (isComplete) {
             
             // Logika rabatu na stronie głównej
             if (totalItemsInCart === 0) {
@@ -2456,20 +3685,40 @@ function updateModularIconActiveStates() {
                 orderSummarySection.classList.add('summary-highlight');
             }
         } else {
-            priceAndActionsContainer.style.display = 'none';
-            priceHint.textContent = "Błąd obliczania ceny. Sprawdź opcje.";
-            priceHint.style.display = 'block';
+            // Są wymiary ale brak kolorów — pokaż cenę z rabatem -10%
+            const totalItemsInCartPreview = cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (totalItemsInCartPreview === 0) {
+                const discountedPrice = originalPrice * 0.90;
+                originalPriceSummary.textContent = originalPrice.toFixed(2) + ' zł';
+                priceSummary.textContent = discountedPrice.toFixed(2) + ' zł';
+                originalPriceSummary.style.display = 'block';
+                mainPageDiscountHint.textContent = 'Otrzymujesz 10% rabatu!';
+                mainPageDiscountHint.classList.add('visible');
+            } else if (totalItemsInCartPreview === 1) {
+                const discountedPrice = originalPrice * 0.75;
+                originalPriceSummary.textContent = originalPrice.toFixed(2) + ' zł';
+                priceSummary.textContent = discountedPrice.toFixed(2) + ' zł';
+                originalPriceSummary.style.display = 'block';
+                mainPageDiscountHint.textContent = 'Brawo! Na tę półkę otrzymasz aż 25% zniżki!';
+                mainPageDiscountHint.classList.add('visible');
+            } else {
+                priceSummary.textContent = originalPrice.toFixed(2) + ' zł';
+                originalPriceSummary.style.display = 'none';
+                mainPageDiscountHint.classList.remove('visible');
+            }
             if (mobile3dActionsContainer) mobile3dActionsContainer.style.display = 'none';
         }
     } else {
-        priceAndActionsContainer.style.display = 'none';
-        priceHint.textContent = "Wybierz wszystkie parametry, aby zobaczyć cenę.";
-        priceHint.style.display = 'block';
+        // Brak wymiarów — placeholder
+        if (priceSummary) priceSummary.textContent = '— zł';
+        if (originalPriceSummary) originalPriceSummary.style.display = 'none';
+        if (mainPageDiscountHint) mainPageDiscountHint.classList.remove('visible');
         if (mobile3dActionsContainer) mobile3dActionsContainer.style.display = 'none';
     }
     updateDividerDimensionVisibility();
     updateMobileShelfInfo();
     updateSectionHighlights();
+    showOrHideCustomShelfToggle();
 }
 function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const sideColorVal = sideColorSelect.value || ''; const shelfColorVal = shelfColorSelect.value || ''; if (!shelfTypeVal || !sideColorVal || !shelfColorVal) return null; const typeCode = valueToCode.type[shelfTypeVal]; const sideColorCode = valueToCode.color[sideColorVal]; const shelfColorCode = valueToCode.color[shelfColorVal]; if (!typeCode || sideColorCode === undefined || shelfColorCode === undefined) return null; 
             if (shelfTypeVal === 'modular') {
@@ -2775,7 +4024,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                     "Kolor boków": details.sideColor,
                     "Kolor półek": details.shelfColor,
                     "Półki wewn.": `${details.shelfCount} szt.`,
-                    "Odstęp": details.gapInfo,
+                    "Odstęp": details.customPosInfo || details.gapInfo,
                     "Opcje": details.options
                 };
                 
@@ -2879,7 +4128,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                     "Kolor boków": details.sideColor,
                     "Kolor półek": details.shelfColor,
                     "Liczba półek wewn.": `${details.shelfCount} szt.`,
-                    "Odstęp między półkami": details.gapInfo,
+                    "Odstęp między półkami": details.customPosInfo || details.gapInfo,
                     "Opcje dodatkowe": details.options
                 };;
 
@@ -3151,7 +4400,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
     }
 }
         function initializeReviews() { const reviews = [ '"Fantastyczna półeczka, przyszła od razu zmontowana i idealnie pasuje w wielu miejscach. Serdecznie polecam!"', '"Piękna, zgrabna półka. Solidnie wykonana, bez żadnych wad. Polecam!"', '"Bardzo ładna i funkcjonalna półka, świetnie zapakowana na czas transportu. Polecam!"', '"Super produkt – pięknie wykonany, idealnie pasuje do małych słoiczków z przyprawami w kuchni. Polecam!"', '"Ładna i solidna półka, starannie wykonana. Kolor świetnie wpasował się w meble. Polecam!"' ]; let currentReviewIndex = 0; const reviewDisplay = document.getElementById('customerReview'); function showNextReview() { if (!reviewDisplay) return; reviewDisplay.classList.remove('review-fade-enter-active'); setTimeout(() => { const reviewData = reviews[currentReviewIndex]; reviewDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-lime-500 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> ${reviewData}`; reviewDisplay.classList.add('review-fade-enter-active'); currentReviewIndex = (currentReviewIndex + 1) % reviews.length; }, 700); } if (reviewDisplay) { showNextReview(); setInterval(showNextReview, 6000); } }
-        function open3dPanel() { if (shelfContainer) { shelfContainer.classList.add('active'); setTimeout(onWindowResize, 50); updateDividerIconsVisibility(); updateMobileMountStripStates(); updateModularIconsVisibility(); } else { console.error("Nie można otworzyć panelu 3D - brak elementu #shelfContainer"); } }
+        function open3dPanel() { if (shelfContainer) { shelfContainer.classList.add('active'); setTimeout(onWindowResize, 50); setTimeout(positionRotateBtn, 100); updateDividerIconsVisibility(); updateMobileMountStripStates(); updateModularIconsVisibility(); } else { console.error("Nie można otworzyć panelu 3D - brak elementu #shelfContainer"); } }
         function close3dPanel() { if (shelfContainer) { shelfContainer.classList.remove('active'); setActiveMobileIcon(null); updateDividerIconsVisibility(); } }
         function initialize3dPanel() { show3dButton = document.getElementById('show3dButton'); collapse3dPanelButton = document.getElementById('collapse3dPanelButton'); if (show3dButton && collapse3dPanelButton && shelfContainer) { show3dButton.addEventListener('click', open3dPanel); console.log("Panel 3D zainicjalizowany."); } else { let missing = []; if (!show3dButton) missing.push("show3dButton"); if (!collapse3dPanelButton) missing.push("collapse3dPanelButton (lub jego odpowiednik)"); if (!shelfContainer) missing.push("shelfContainer"); console.warn(`Nie znaleziono elementów panelu 3D: ${missing.join(', ')}. Funkcjonalność może nie działać poprawnie.`); } }
 
@@ -3172,6 +4421,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
             viewOrderCodeInput = document.getElementById('viewOrderCodeInput'); 
             imageLightbox = document.getElementById('imageLightbox'); lightboxImage = document.getElementById('lightboxImage'); lightboxCloseBtn = document.getElementById('lightboxClose');
             priceAndActionsContainer = document.getElementById('priceAndActionsContainer');
+            { const ps = document.getElementById('priceSummary'); if(ps && !ps.textContent) ps.textContent = '— zł'; }
             priceHint = document.getElementById('priceHint');
             addToCartBtn = document.getElementById('addToCartBtn');
             mobileIconDetailsType = document.getElementById('mobileIconDetailsType');
