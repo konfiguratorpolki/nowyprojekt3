@@ -2326,7 +2326,7 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
             </button>
 
             <!-- Przycisk Dalej — prawy dolny, pojawia się po wyborze wszystkich parametrów -->
-            <button id="mobileDalej3dBtn" onclick="scrollToElementAndHighlight('priceAndActionsContainer','center')">
+            <button id="mobileDalej3dBtn" onclick="(function(){ const el = document.getElementById('priceAndActionsContainer'); if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); } else { document.getElementById('addToCartBtn')?.scrollIntoView({behavior:'smooth', block:'center'}); } })()">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 <span>Dalej</span>
             </button>
