@@ -415,6 +415,9 @@ body.no-scroll {
             pointer-events: none;
             gap: 0;
             min-width: 82px;
+            will-change: transform;
+            transform: translate3d(0,0,0);
+            -webkit-transform: translate3d(0,0,0);
         }
         .mobile-3d-action-btn { display: none; }
 
@@ -423,6 +426,9 @@ body.no-scroll {
             pointer-events: auto;
             border-radius: 14px;
             box-shadow: 0 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.07);
+            will-change: transform;
+            transform: translate3d(0,0,0);
+            -webkit-transform: translate3d(0,0,0);
         }
 
         #mobilePriceIcon {
@@ -469,23 +475,44 @@ body.no-scroll {
             position: absolute !important;
             top: 10px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translate3d(0,0,0);
+            -webkit-transform: translateX(-50%) translate3d(0,0,0);
             z-index: 1002;
             background: rgba(255,255,255,0.93) !important;
-            backdrop-filter: blur(18px) !important;
-            -webkit-backdrop-filter: blur(18px) !important;
             border-radius: 10px !important;
             padding: 7px 14px !important;
             box-shadow: 0 3px 12px rgba(0,0,0,0.10) !important;
             border: 1px solid rgba(255,255,255,0.7) !important;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: background 0.15s ease;
             white-space: nowrap;
+            will-change: transform;
         }
         #mobileParamsDrawerToggle:active { transform: translateX(-50%) scale(0.95); }
         #mobileParamsDrawerToggle.open svg { transform: rotate(180deg); }
         #mobileParamsDrawerToggle svg { width: 11px; height: 11px; stroke: #6b7280; stroke-width: 2.2; flex-shrink: 0; transition: transform 0.25s ease; }
         #mobileParamsDrawerToggle span { font-size: 8px; font-weight: 800; color: #6b7280; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1; }
+
+        /* Przycisk Dalej */
+        #mobileDalej3dBtn {
+            display: none;
+            position: absolute !important;
+            right: 10px; bottom: 24px;
+            z-index: 1003;
+            align-items: center;
+            gap: 6px;
+            padding: 0 14px;
+            height: 38px;
+            background: #16a34a;
+            border: none;
+            border-radius: 11px;
+            box-shadow: 0 3px 12px rgba(22,163,74,0.35);
+            cursor: pointer;
+            transition: background 0.15s;
+            will-change: transform;
+            transform: translate3d(0,0,0);
+            -webkit-transform: translate3d(0,0,0);
+        }
 
         /* ---- BADGE RABATOWY — wysuwa się pod tab parametrów ---- */
         #mobileDiscountHint {
@@ -522,24 +549,8 @@ body.no-scroll {
         #mobileGoToSummaryBtn { display: none !important; }
 
         /* ---- Przycisk Dalej — mały pill, prawy dolny ---- */
-        #mobileDalej3dBtn {
-            display: none;
-            position: absolute !important;
-            right: 10px; bottom: 24px;
-            z-index: 1003;
-            align-items: center;
-            gap: 5px;
-            padding: 0 14px;
-            height: 38px;
-            background: #16a34a;
-            border: none;
-            border-radius: 11px;
-            box-shadow: 0 3px 12px rgba(22,163,74,0.35);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
         #mobileDalej3dBtn.visible { display: flex !important; }
-        #mobileDalej3dBtn:active { transform: scale(0.94); background: #15803d; }
+        #mobileDalej3dBtn:active { transform: scale(0.94) translate3d(0,0,0); background: #15803d; }
         #mobileDalej3dBtn svg { width: 13px; height: 13px; stroke: white; flex-shrink: 0; }
         #mobileDalej3dBtn span { font-size: 12px; font-weight: 800; color: white; letter-spacing: 0.03em; }
 
@@ -681,20 +692,23 @@ body.no-scroll {
             position: absolute !important;
             left: 12px; bottom: 24px;
             z-index: 1001 !important; gap: 5px;
+            will-change: transform;
+            transform: translate3d(0,0,0);
         }
         #mobilePanelIcons button {
             display: flex; align-items: center; justify-content: center;
             flex-direction: column;
             width: 46px; height: 52px; padding: 3px 2px;
-            background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.82);
+            border: 1px solid rgba(255,255,255,0.5);
             border-radius: 13px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.10);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: background 0.15s ease, transform 0.15s ease;
             color: #6b7280; overflow: hidden;
+            will-change: transform;
+            transform: translate3d(0,0,0);
+            -webkit-transform: translate3d(0,0,0);
         }
         #mobilePanelIcons button:active { transform: scale(0.92); background: rgba(240,240,240,0.75); }
         #mobilePanelIcons button svg { width: 18px; height: 18px; margin: 0; color: #6b7280; transition: color 0.15s; flex-shrink: 0; }
