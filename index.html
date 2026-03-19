@@ -2150,22 +2150,23 @@ body.no-scroll {
 .drag-btn-done:active { background: #15803d; transform: scale(0.97); }
 /* Hint */
 .drag-hint {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 15;
-    background: rgba(0,0,0,0.7); color: white; 
-    padding: 20px 36px;
-    border-radius: 20px; 
-    font-size: 17px; font-weight: 600;
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 15;
+    background: rgba(0,0,0,0.55); color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
     pointer-events: none; text-align: center;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
     animation: dragHintFade 3s ease forwards;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    display: flex; flex-direction: row; align-items: center; gap: 6px;
+    white-space: nowrap;
 }
-.drag-hint svg { width: 40px; height: 40px; stroke: white; opacity: 0.8; }
-@keyframes dragHintFade { 
-    0% { opacity: 0; transform: translate(-50%,-50%) scale(0.85); } 
-    12% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 
-    75% { opacity: 1; } 
-    100% { opacity: 0; transform: translate(-50%,-50%) scale(0.95); } 
+.drag-hint svg { width: 14px; height: 14px; stroke: white; opacity: 0.9; }
+@keyframes dragHintFade {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    75% { opacity: 1; }
+    100% { opacity: 0; }
 }
 /* Desktop: not fullscreen, just overlay on 3D wrapper */
 @media (min-width: 768px) {
@@ -2177,8 +2178,8 @@ body.no-scroll {
     .drag-banner-text { font-size: 13px; }
     .drag-bottom-bar { padding: 12px 16px; }
     .drag-btn { padding: 10px 22px; font-size: 13px; border-radius: 10px; }
-    .drag-hint { font-size: 14px; padding: 14px 24px; border-radius: 14px; }
-    .drag-hint svg { width: 28px; height: 28px; }
+    .drag-hint { font-size: 11px; padding: 6px 14px; }
+    .drag-hint svg { width: 14px; height: 14px; }
 }
 </style>
 </head>
@@ -2678,22 +2679,22 @@ Zadaj pytanie", wklejając kod w wiadomości.</span></li>
             </div>
 
             <div id="mobilePanelIcons" class="hidden md:hidden">
-                <button onclick="scrollToElementAndHighlight('shelfTypeSectionAnchor', 'start', this);" title="Przewiń do rodzaju półki">
+                <button onclick="if(window.innerWidth<768)open3dPanel(); scrollToElementAndHighlight('shelfTypeSectionAnchor', 'start', this);" title="Przewiń do rodzaju półki">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 1.905c-.007.379.137.75.431.99l1.005.828c.428.355.53 1.005.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-1.905c.007-.379-.137-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" /> <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /> </svg>
                     <span>Rodzaj</span>
                     <small id="mobileIconDetailsType" class="mobile-icon-details mobile-icon-prompt">nie wybrano</small>
                 </button>
-                <button onclick="scrollToElementAndHighlight('dimensionSectionAnchor', 'start', this);" title="Przewiń do wymiarów">
+                <button onclick="if(window.innerWidth<768)open3dPanel(); scrollToElementAndHighlight('dimensionSectionAnchor', 'start', this);" title="Przewiń do wymiarów">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" /> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v16.5M20.25 3.75v16.5" /> </svg>
                     <span>Wymiary</span>
                     <small id="mobileIconDetailsDimensions" class="mobile-icon-details mobile-icon-prompt">nie wybrano</small>
                 </button>
-                <button onclick="scrollToElementAndHighlight('colorSectionAnchor', 'start', this);" title="Przewiń do kolorów">
+                <button onclick="if(window.innerWidth<768)open3dPanel(); scrollToElementAndHighlight('colorSectionAnchor', 'start', this);" title="Przewiń do kolorów">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /> </svg>
                     <span>Kolory</span>
                     <small id="mobileIconDetailsColors" class="mobile-icon-details mobile-icon-prompt">nie wybrano</small>
                 </button>
-                <button onclick="scrollToElementAndHighlight('shelfCountSection', 'start', this);" title="Przewiń do dodawania półek">
+                <button onclick="if(window.innerWidth<768)open3dPanel(); scrollToElementAndHighlight('shelfCountSection', 'start', this);" title="Przewiń do dodawania półek">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5M3.75 15h16.5" />
@@ -3898,7 +3899,7 @@ function fitCameraToShelf() {
                     targetScale = Math.min(Math.max(targetScale, 0.5), 3.0);
                     shelfGroup.scale.set(targetScale, targetScale, targetScale);
                     
-                    const _mobOff = (window.innerWidth < 768 && parseInt(heightSelect && heightSelect.value) >= 80) ? -9.0 : (window.innerWidth < 768 ? -2.0 : -1);
+                    const _mobOff = (window.innerWidth < 768 && parseInt(heightSelect && heightSelect.value) >= 80) ? -5.0 : (window.innerWidth < 768 ? -1.0 : -1);
                     shelfGroup.position.y = _mobOff;
                     scene.add(shelfGroup);
                     
@@ -3926,7 +3927,7 @@ function fitCameraToShelf() {
                     const box = new THREE.Box3().setFromObject(shelfGroup);
                     const center = box.getCenter(new THREE.Vector3());
                     shelfGroup.children.forEach(child => child.position.sub(center));
-                    const _mobOff = (window.innerWidth < 768 && parseInt(heightSelect && heightSelect.value) >= 80) ? -9.0 : (window.innerWidth < 768 ? -2.0 : -1);
+                    const _mobOff = (window.innerWidth < 768 && parseInt(heightSelect && heightSelect.value) >= 80) ? -5.0 : (window.innerWidth < 768 ? -1.0 : -1);
                     shelfGroup.position.y = _mobOff;
                     shelfGroup.scale.set(1.1, 1.1, 1.1);
                     scene.add(shelfGroup);
@@ -3951,7 +3952,7 @@ function fitCameraToShelf() {
                         const finalPos = finalPositions.get(child.name);
                         gsap.set(child.position, { x: finalPos.x, z: finalPos.z, y: startY + i * 0.05 });
                     });
-                    const _mobOff = (window.innerWidth < 768 && parseInt(heightSelect && heightSelect.value) >= 80) ? -9.0 : (window.innerWidth < 768 ? -2.0 : -1);
+                    const _mobOff = (window.innerWidth < 768 && parseInt(heightSelect && heightSelect.value) >= 80) ? -5.0 : (window.innerWidth < 768 ? -1.0 : -1);
                     shelfGroup.position.y = _mobOff;
                     shelfGroup.scale.set(1.1, 1.1, 1.1);
                     scene.add(shelfGroup);
@@ -5963,10 +5964,19 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                 ease: 'power2.in' // Sprawia, że animacja przyspiesza pod koniec
             });
 
-            // W trakcie animacji ładujemy nową półkę, ALE JUŻ NIE OTWIERAMY PANELU 3D
+            // Ładujemy konfigurację i otwieramy panel 3D
             tl.call(() => {
                 applyShelfConfigurationFromGallery(galleryIndex, imageIndex);
-                // open3dPanel(); // ZMIANA: Ta linia została usunięta
+                open3dPanel();
+                // Po otwarciu panelu wyśrodkuj półkę
+                setTimeout(() => {
+                    if (shelfGroup && camera && controls) {
+                        shelfGroup.position.y = -1.0;
+                        controls.target.set(0, -1.0, 0);
+                        camera.position.set(-4, 1.0, 8.0);
+                        controls.update();
+                    }
+                }, 300);
             }, [], ">-0.7"); 
 
             return; // Kończymy, aby nie wykonać animacji dla desktopu
@@ -6126,7 +6136,25 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
     }
 }
         function initializeReviews() { const reviews = [ '"Fantastyczna półeczka, przyszła od razu zmontowana i idealnie pasuje w wielu miejscach. Serdecznie polecam!"', '"Piękna, zgrabna półka. Solidnie wykonana, bez żadnych wad. Polecam!"', '"Bardzo ładna i funkcjonalna półka, świetnie zapakowana na czas transportu. Polecam!"', '"Super produkt – pięknie wykonany, idealnie pasuje do małych słoiczków z przyprawami w kuchni. Polecam!"', '"Ładna i solidna półka, starannie wykonana. Kolor świetnie wpasował się w meble. Polecam!"' ]; let currentReviewIndex = 0; const reviewDisplay = document.getElementById('customerReview'); function showNextReview() { if (!reviewDisplay) return; reviewDisplay.classList.remove('review-fade-enter-active'); setTimeout(() => { const reviewData = reviews[currentReviewIndex]; reviewDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-lime-500 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> ${reviewData}`; reviewDisplay.classList.add('review-fade-enter-active'); currentReviewIndex = (currentReviewIndex + 1) % reviews.length; }, 700); } if (reviewDisplay) { showNextReview(); setInterval(showNextReview, 6000); } }
-        function open3dPanel() { if (shelfContainer) { shelfContainer.classList.add('active'); setTimeout(onWindowResize, 50); updateDividerIconsVisibility(); updateMobileMountStripStates(); updateModularIconsVisibility(); } else { console.error("Nie można otworzyć panelu 3D - brak elementu #shelfContainer"); } }
+        function open3dPanel() { if (shelfContainer) { shelfContainer.classList.add('active'); setTimeout(onWindowResize, 50); updateDividerIconsVisibility(); updateMobileMountStripStates(); updateModularIconsVisibility();
+    // Po otwarciu panelu wyśrodkuj półkę w widoku
+    if (window.innerWidth < 768) {
+        setTimeout(() => {
+            if (shelfGroup && camera && controls) {
+                const h = parseInt(heightSelect && heightSelect.value) || 60;
+                // Pozycja Y modelu — taka sama jak przy budowaniu
+                const targetY = h >= 80 ? -9.0 : -2.0;
+                shelfGroup.position.y = targetY;
+                // Kamera patrzy wyżej niż model → model widoczny w środku ekranu
+                const camTarget = h >= 80 ? 0.5 : -1.0;
+                const camZ = h >= 80 ? 10.0 : 8.0;
+                controls.target.set(0, camTarget, 0);
+                camera.position.set(-4, h >= 80 ? 2.0 : 1.0, camZ);
+                controls.update();
+            }
+        }, 100);
+    }
+} else { console.error("Nie można otworzyć panelu 3D - brak elementu #shelfContainer"); } }
         function close3dPanel() { if (shelfContainer) { shelfContainer.classList.remove('active'); setActiveMobileIcon(null); updateDividerIconsVisibility(); updateModularIconsVisibility(); closeMobileParamsDrawer(); } }
 
         function syncMobileParamsDrawer() {
@@ -6600,16 +6628,27 @@ function enterDragMode() {
 
     // Dopasuj kamerę do wysokości półki
     const editHeight = parseInt(heightSelect && heightSelect.value) || 60;
-    let camZ, camY, editTargetY;
-    if (editHeight >= 80) {
-        camZ = 8.0; camY = 2.0; editTargetY = -1.0;
-    } else if (editHeight >= 60) {
-        camZ = 7.5; camY = 1.8; editTargetY = -1.2;
-    } else {
-        camZ = 6.5; camY = 1.5; editTargetY = -1.4;
+
+    // Wyśrodkuj kamerę na modelu — niezależnie od jego pozycji Y
+    if (shelfGroup && camera && controls) {
+        const box = new THREE.Box3().setFromObject(shelfGroup);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const fov = camera.fov * (Math.PI / 180);
+        const dist = Math.max((maxDim / 2) / Math.tan(fov / 2) * 1.3, 5);
+        controls.target.copy(center);
+        gsap.to(camera.position, {
+            x: center.x - 4,
+            y: center.y + 1,
+            z: center.z + dist,
+            duration: 0.5, ease: 'power2.inOut',
+            onUpdate: function() { if (controls) controls.update(); }
+        });
+        controls.update();
     }
-    gsap.to(camera.position, { x: -4, y: camY, z: camZ, duration: 0.5, ease: 'power2.inOut', onUpdate: function() { if (controls) controls.update(); } });
-    if (controls) { controls.target.set(0, editTargetY, 0); controls.update(); }
 
     dragRaycaster = new THREE.Raycaster();
 
