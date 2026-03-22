@@ -7672,7 +7672,6 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 date_add: Math.floor(Date.now() / 1000),
                                 currency: 'PLN',
                                 payment_method: 'przelew',
-                                payment_done: 0,
                                 delivery_method: 'kurier',
                                 delivery_price: 0,
                                 delivery_fullname: firstName + ' ' + lastName,
@@ -7694,8 +7693,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 user_comments: notes + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
                                 admin_comments: 'Zamówienie z konfiguratora na stronie',
                                 products: products,
-                                price_brutto: totals.total,
-                                paid: 0
+                                price_brutto: totals.total
                             };
 
                             try {
