@@ -7659,8 +7659,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 quantity: item.quantity,
                                 price_brutto: item.price,
                                 tax_rate: 23,
-                                weight: 2,
-                                attributes: item.summary + ' | ' + item.sideColor + ' | ' + item.shelfColor + ' | ' + item.shelfCountText
+                                weight: 2
                             }));
 
                             // 4. Payload do BaseLinker API
@@ -7684,8 +7683,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 user_login: email,
                                 user_comments: 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
                                 admin_comments: 'Zamowienie z konfiguratora na stronie',
-                                products: products,
-                                price_brutto: totals.total
+                                products: products
                             };
 
                             try {
