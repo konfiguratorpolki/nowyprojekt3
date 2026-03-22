@@ -7679,11 +7679,11 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 delivery_city: city,
                                 delivery_postcode: postCode,
                                 delivery_country_code: 'PL',
-                                buyer_email: email,
-                                buyer_phone: phone,
-                                buyer_login: email,
-                                user_comments: 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
-                                admin_comments: 'Zamówienie z konfiguratora na stronie',
+                                email: email,
+                                phone: phone,
+                                user_login: email,
+                                comments: 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
+                                extra_field_1: 'Zamówienie z konfiguratora na stronie',
                                 products: products,
                                 price_brutto: totals.total
                             };
