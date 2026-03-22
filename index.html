@@ -7682,8 +7682,8 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 email: email,
                                 phone: phone,
                                 user_login: email,
-                                comments: 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
-                                extra_field_1: 'Zamówienie z konfiguratora na stronie',
+                                user_comments: 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
+                                admin_comments: 'Zamowienie z konfiguratora na stronie',
                                 products: products,
                                 price_brutto: totals.total
                             };
