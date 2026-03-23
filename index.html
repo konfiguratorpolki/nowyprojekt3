@@ -2412,8 +2412,15 @@ body.no-scroll {
                     <span>Rabat (-25%)</span>
                     <span id="cartDiscountAmount25"></span>
                  </div>
+                 <div class="cart-total-row" id="cartShippingLine" style="display:none;">
+                    <span style="display:flex;align-items:center;gap:5px;font-size:0.82rem;">
+                        <svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'><rect x='1' y='3' width='15' height='13' rx='1'/><path d='M16 8h4l3 4v4h-7V8z'/><circle cx='5.5' cy='18.5' r='1.5'/><circle cx='18.5' cy='18.5' r='1.5'/></svg>
+                        Kurier DPD
+                    </span>
+                    <span id="cartShippingPrice" style="color:#374151;font-weight:600;"></span>
+                 </div>
                  <div class="cart-total-final" id="cartTotalPriceLine">
-                     <span class="label">Razem</span>
+                     <span class="label">Razem z wysyłką</span>
                      <span class="price" id="cartTotalPrice">0,00 zł</span>
                  </div>
             </div>
@@ -2490,6 +2497,10 @@ body.no-scroll {
                 <h3 id="cartSummaryModalTitle" class="modal-title">Podsumowanie Twojego zamówienia</h3>
                 <button id="cartSummaryModalCloseBtnTop" class="modal-close-button" aria-label="Zamknij">&times;</button>
             </div>
+<div id="cartSummaryShippingBanner" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-bottom:1px solid #bbf7d0;padding:9px 18px;display:flex;align-items:center;gap:9px;">
+                    <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' stroke='#16a34a' stroke-width='2'><rect x='1' y='3' width='15' height='13' rx='1'/><path d='M16 8h4l3 4v4h-7V8z'/><circle cx='5.5' cy='18.5' r='1.5'/><circle cx='18.5' cy='18.5' r='1.5'/></svg>
+                    <span style="font-size:0.78rem;color:#166534;font-weight:600;">Dostawa Kurierem DPD — <strong>19 zł</strong> za każdą półkę</span>
+                </div>
 <div class="modal-body">
                 <div id="cartSummaryItemsContainer" class="space-y-4">
                     </div>
@@ -2503,8 +2514,15 @@ body.no-scroll {
                             <span>Łączny rabat:</span>
                             <span id="cartSummaryCombinedDiscountAmount"></span>
                          </div>
+                         <div class="flex justify-between text-sm text-stone-500 mt-1" id="cartSummaryShippingLine" style="display:none;">
+                            <span style="display:flex;align-items:center;gap:5px;">
+                              <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'><rect x='1' y='3' width='15' height='13' rx='1'/><path d='M16 8h4l3 4v4h-7V8z'/><circle cx='5.5' cy='18.5' r='1.5'/><circle cx='18.5' cy='18.5' r='1.5'/></svg>
+                              Kurier DPD (19 zł / szt.)
+                            </span>
+                            <span id="cartSummaryShippingPrice" class="font-semibold text-stone-700"></span>
+                         </div>
                          <div class="flex justify-between items-baseline font-bold text-2xl border-t-2 border-stone-300 pt-2 mt-2">
-                             <span>Cena:</span>
+                             <span>Razem z wysyłką:</span>
                              <span id="cartSummaryTotalPrice" class="text-red-600">0,00 zł</span>
                          </div>
                     </div>
@@ -2557,6 +2575,45 @@ body.no-scroll {
                             <div>
                                 <label class="block text-xs font-semibold text-stone-500 mb-1 uppercase tracking-wide">Uwagi do zamówienia (opcjonalnie)</label>
                                 <textarea id="orderNotes" rows="2" placeholder="" class="w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"></textarea>
+                            </div>
+                            <!-- FAKTURA -->
+                            <div id="invoiceSection" style="border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+                                <button type="button" id="invoiceToggleBtn" onclick="toggleInvoiceSection()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#f9fafb;border:none;cursor:pointer;transition:background 0.15s;position:relative;z-index:10;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">
+                                    <span style="display:flex;align-items:center;gap:9px;">
+                                        <span style="width:28px;height:28px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24' stroke='#16a34a' stroke-width='2'><rect x='4' y='2' width='16' height='20' rx='2'/><line x1='8' y1='6' x2='16' y2='6'/><line x1='8' y1='10' x2='16' y2='10'/><line x1='8' y1='14' x2='13' y2='14'/></svg>
+                                        </span>
+                                        <span>
+                                            <span style="font-size:0.82rem;font-weight:700;color:#374151;">Chcę fakturę VAT</span>
+                                            <span id="invoiceToggleHint" style="display:block;font-size:0.7rem;color:#9ca3af;margin-top:1px;">Kliknij, aby wypełnić dane firmy</span>
+                                        </span>
+                                    </span>
+                                    <span id="invoiceToggleIndicator" style="width:38px;height:21px;border-radius:99px;background:#e5e7eb;position:relative;transition:background 0.2s;flex-shrink:0;">
+                                        <span id="invoiceToggleKnob" style="position:absolute;left:2px;top:2px;width:17px;height:17px;border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:transform 0.2s;"></span>
+                                    </span>
+                                </button>
+                                <div id="invoiceFields" style="display:none;padding:12px 14px 14px;border-top:1px solid #f3f4f6;background:#fff;">
+                                    <div style="display:flex;flex-direction:column;gap:10px;">
+                                        <div>
+                                            <label style="display:block;font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Nazwa firmy *</label>
+                                            <input type="text" id="invoiceCompany" placeholder="np. Firma Sp. z o.o." style="width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:0.875rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#16a34a';this.style.boxShadow='0 0 0 2px rgba(22,163,74,0.2)'" onblur="this.style.borderColor='#d1d5db';this.style.boxShadow='none'" />
+                                        </div>
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                            <div>
+                                                <label style="display:block;font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NIP *</label>
+                                                <input type="text" id="invoiceNip" placeholder="000-000-00-00" maxlength="13" style="width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:0.875rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#16a34a';this.style.boxShadow='0 0 0 2px rgba(22,163,74,0.2)'" onblur="this.style.borderColor='#d1d5db';this.style.boxShadow='none'" />
+                                            </div>
+                                            <div>
+                                                <label style="display:block;font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Kod pocztowy firmy *</label>
+                                                <input type="text" id="invoicePostCode" placeholder="00-000" maxlength="6" style="width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:0.875rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#16a34a';this.style.boxShadow='0 0 0 2px rgba(22,163,74,0.2)'" onblur="this.style.borderColor='#d1d5db';this.style.boxShadow='none'" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style="display:block;font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Adres firmy (ulica, miasto) *</label>
+                                            <input type="text" id="invoiceAddress" placeholder="ul. Przykładowa 1, Warszawa" style="width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:0.875rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#16a34a';this.style.boxShadow='0 0 0 2px rgba(22,163,74,0.2)'" onblur="this.style.borderColor='#d1d5db';this.style.boxShadow='none'" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div id="orderFormError" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
@@ -4127,7 +4184,8 @@ body.no-scroll {
         function decreaseQuantity(itemCode) { const item = cart.find(i => i.code === itemCode); if (item && item.quantity > 1) { item.quantity--; } else { cart = cart.filter(i => i.code !== itemCode); } updateCartDisplay(); }
         function removeFromCart(itemCode) { cart = cart.filter(item => item.code !== itemCode); updateCartDisplay(); }
         
-        function calculateCartTotal() { const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); let discount10 = 0; let discount25 = 0; const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); if (totalItems === 1) { const itemPrice = cart[0].price; discount10 = itemPrice * DISCOUNTS.discount1item; } else if (totalItems >= 2) { const allPrices = []; cart.forEach(item => { for (let i = 0; i < item.quantity; i++) { allPrices.push(item.price); } }); allPrices.sort((a, b) => b - a); const maxPrice = allPrices[0]; const minPrice = allPrices[allPrices.length - 1]; discount10 = maxPrice * DISCOUNTS.discountBest; discount25 = minPrice * DISCOUNTS.discountCheap; } const totalDiscount = discount10 + discount25; const total = subtotal - totalDiscount; return { subtotal, discount10, discount25, totalDiscount, total }; }
+        const SHIPPING_PER_ITEM = 19; // Kurier DPD — 19 zł za każdą półkę
+        function calculateCartTotal() { const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); let discount10 = 0; let discount25 = 0; const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); if (totalItems === 1) { const itemPrice = cart[0].price; discount10 = itemPrice * DISCOUNTS.discount1item; } else if (totalItems >= 2) { const allPrices = []; cart.forEach(item => { for (let i = 0; i < item.quantity; i++) { allPrices.push(item.price); } }); allPrices.sort((a, b) => b - a); const maxPrice = allPrices[0]; const minPrice = allPrices[allPrices.length - 1]; discount10 = maxPrice * DISCOUNTS.discountBest; discount25 = minPrice * DISCOUNTS.discountCheap; } const totalDiscount = discount10 + discount25; const shipping = totalItems * SHIPPING_PER_ITEM; const total = subtotal - totalDiscount + shipping; return { subtotal, discount10, discount25, totalDiscount, shipping, total }; }
         function openCart() { if (cartPanel && cartPanelOverlay) { cartPanel.classList.add('visible'); cartPanelOverlay.classList.add('visible'); document.body.style.overflow = 'hidden'; } }
         function closeCart() { if (cartPanel && cartPanelOverlay) { cartPanel.classList.remove('visible'); cartPanelOverlay.classList.remove('visible'); document.body.style.overflow = ''; } }
         
@@ -4181,7 +4239,7 @@ body.no-scroll {
                 </div>
             </div>
         `;
-        cartItemsContainer.appendChild(itemElement); }); } if (cartDiscountReminder) { if (totalItems === 1) { cartDiscountReminder.innerHTML = `✨ <b>Otrzymujesz 10% rabatu!</b> Dodaj jeszcze jedną półkę, a na tańszą z nich dostaniesz aż <b>25% zniżki.</b>`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else if (totalItems >= 2) { cartDiscountReminder.innerHTML = `🎁 <b>Świetnie!</b> Otrzymujesz <b>10% rabatu</b> na najdroższą półkę i <b>25%</b> na najtańszą!`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else { cartDiscountReminder.style.display = 'none'; } } const totals = calculateCartTotal(); if (totals.totalDiscount > 0) { cartSubtotalLine.style.display = 'flex'; cartSubtotalPrice.textContent = `${totals.subtotal.toFixed(2)} zł`; cartDiscountLine10.style.display = totals.discount10 > 0 ? 'flex' : 'none'; cartDiscountAmount10.textContent = `- ${totals.discount10.toFixed(2)} zł`; cartDiscountLine25.style.display = totals.discount25 > 0 ? 'flex' : 'none'; cartDiscountAmount25.textContent = `- ${totals.discount25.toFixed(2)} zł`; } else { cartSubtotalLine.style.display = 'none'; cartDiscountLine10.style.display = 'none'; cartDiscountLine25.style.display = 'none'; } if (totals.totalDiscount === 0) { cartSubtotalPrice.classList.remove('discount-subtotal-slash'); } if (justGotDiscount) { triggerDiscountAnimation(); } cartTotalPrice.textContent = `${totals.total.toFixed(2)} zł`; cartBadges.forEach(badge => { badge.textContent = totalItems; badge.style.display = totalItems > 0 ? 'flex' : 'none'; }); if(mobileCartButton) { const mobileCartPriceSpan = mobileCartButton.querySelector('.mobile-cart-price'); if(mobileCartPriceSpan) { mobileCartPriceSpan.textContent = totalItems > 0 ? `${totals.total.toFixed(2)} zł` : 'Koszyk'; } } cartCheckoutButton.disabled = cart.length === 0; previousCartItemCount = totalItems; }
+        cartItemsContainer.appendChild(itemElement); }); } if (cartDiscountReminder) { if (totalItems === 1) { cartDiscountReminder.innerHTML = `✨ <b>Otrzymujesz 10% rabatu!</b> Dodaj jeszcze jedną półkę, a na tańszą z nich dostaniesz aż <b>25% zniżki.</b>`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else if (totalItems >= 2) { cartDiscountReminder.innerHTML = `🎁 <b>Świetnie!</b> Otrzymujesz <b>10% rabatu</b> na najdroższą półkę i <b>25%</b> na najtańszą!`; cartDiscountReminder.className = 'p-3 bg-emerald-50 border-b border-emerald-200 text-center text-sm text-emerald-800'; cartDiscountReminder.style.display = 'block'; } else { cartDiscountReminder.style.display = 'none'; } } const totals = calculateCartTotal(); if (totals.totalDiscount > 0) { cartSubtotalLine.style.display = 'flex'; cartSubtotalPrice.textContent = `${totals.subtotal.toFixed(2)} zł`; cartDiscountLine10.style.display = totals.discount10 > 0 ? 'flex' : 'none'; cartDiscountAmount10.textContent = `- ${totals.discount10.toFixed(2)} zł`; cartDiscountLine25.style.display = totals.discount25 > 0 ? 'flex' : 'none'; cartDiscountAmount25.textContent = `- ${totals.discount25.toFixed(2)} zł`; } else { cartSubtotalLine.style.display = 'none'; cartDiscountLine10.style.display = 'none'; cartDiscountLine25.style.display = 'none'; } if (totals.totalDiscount === 0) { cartSubtotalPrice.classList.remove('discount-subtotal-slash'); } if (justGotDiscount) { triggerDiscountAnimation(); } const cartShippingLine = document.getElementById('cartShippingLine'); const cartShippingPrice = document.getElementById('cartShippingPrice'); if (cartShippingLine && cartShippingPrice && totalItems > 0) { cartShippingLine.style.display = 'flex'; cartShippingPrice.textContent = totals.shipping.toFixed(2) + ' zł'; } else if (cartShippingLine) { cartShippingLine.style.display = 'none'; } cartTotalPrice.textContent = `${totals.total.toFixed(2)} zł`; cartBadges.forEach(badge => { badge.textContent = totalItems; badge.style.display = totalItems > 0 ? 'flex' : 'none'; }); if(mobileCartButton) { const mobileCartPriceSpan = mobileCartButton.querySelector('.mobile-cart-price'); if(mobileCartPriceSpan) { mobileCartPriceSpan.textContent = totalItems > 0 ? `${totals.total.toFixed(2)} zł` : 'Koszyk'; } } cartCheckoutButton.disabled = cart.length === 0; previousCartItemCount = totalItems; }
         function handleCheckout() {
     if (cart.length === 0) return;
     const scrollToCodesBtn = document.getElementById('scrollToCodesBtn');
@@ -4237,7 +4295,7 @@ body.no-scroll {
         cartSummaryCombinedDiscountLine.style.display = 'none';
         cartSummarySubtotalPrice.classList.remove('discount-subtotal-slash');
     }
-    cartSummaryTotalPrice.textContent = `${totals.total.toFixed(2)} zł`;
+    cartSummaryTotalPrice.textContent = `${totals.total.toFixed(2)} zł`; const cartSummaryShippingLine = document.getElementById('cartSummaryShippingLine'); const cartSummaryShippingPrice = document.getElementById('cartSummaryShippingPrice'); if (cartSummaryShippingLine && cartSummaryShippingPrice) { cartSummaryShippingLine.style.display = 'flex'; cartSummaryShippingPrice.textContent = totals.shipping.toFixed(2) + ' zł'; }
     // USUNIĘTO: cartSummaryInstructionUnits.innerHTML = ...
 
     // Zapisz kody konfiguracyjne do ukrytego pola (nie wyświetlaj klientowi)
@@ -4245,11 +4303,11 @@ body.no-scroll {
     if (codesHiddenInput) codesHiddenInput.value = allCodes;
 
     // Resetuj formularz i komunikaty
-    ['orderFirstName','orderLastName','orderEmail','orderPhone','orderStreet','orderPostCode','orderCity','orderNotes'].forEach(id => {
+    ['orderFirstName','orderLastName','orderEmail','orderPhone','orderStreet','orderPostCode','orderCity','orderNotes','invoiceCompany','invoiceNip','invoicePostCode','invoiceAddress'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
-    const errEl = document.getElementById('orderFormError');
+    const invFields = document.getElementById('invoiceFields'); const invIndicator = document.getElementById('invoiceToggleIndicator'); const invKnob = document.getElementById('invoiceToggleKnob'); const invHint = document.getElementById('invoiceToggleHint'); if(invFields){invFields.style.display='none';} if(invIndicator){invIndicator.style.background='#e5e7eb';} if(invKnob){invKnob.style.transform='translateX(0px)';} if(invHint){invHint.textContent='Kliknij, aby wypełnić dane firmy';} const errEl = document.getElementById('orderFormError');
     if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
     const successEl = document.getElementById('orderSuccessMsg');
     if (successEl) successEl.classList.add('hidden');
@@ -4259,9 +4317,10 @@ body.no-scroll {
     if (submitLabel) submitLabel.textContent = 'Złóż zamówienie';
 
     cartSummaryModalOverlay.classList.add('visible');
+
 }
         function closeCartSummaryModal() { if (cartSummaryModalOverlay) { cartSummaryModalOverlay.classList.remove('visible'); const modalBody = document.querySelector('#cartSummaryModal .modal-body'); if (modalBody && modalScrollListener) { modalBody.removeEventListener('scroll', modalScrollListener); modalScrollListener = null; } } }
-        function downloadFullCartSummary() { if (cart.length === 0) { alert("Koszyk jest pusty."); return; } const totals = calculateCartTotal(); const allCodes = cart.flatMap(item => Array(item.quantity).fill(item.code)).join('\n'); const date = new Date().toLocaleString('pl-PL'); let content = `PODSUMOWANIE ZAMÓWIENIA\n`; content += `Data wygenerowania: ${date}\n`; content += `========================================\n\n`; cart.forEach((item, index) => { content += `PRODUKT ${index + 1}: ${item.name} (x${item.quantity})\n`; content += `  Wymiary: ${item.summary}\n`; content += `  Kolor boków: ${item.sideColor}\n`; content += `  Kolor półek: ${item.shelfColor}\n`; content += `  Ilość półek wewn.: ${item.shelfCountText}\n`; content += `  Opcje: ${item.extras}\n`; content += `  Cena jedn.: ${item.price.toFixed(2)} zł\n\n`; }); content += `========================================\n`; if (totals.totalDiscount > 0) { content += `SUMA CZĘŚCIOWA: ${totals.subtotal.toFixed(2)} zł\n`; if(totals.discount10 > 0) content += `Rabat na 1. półkę (-10%): -${totals.discount10.toFixed(2)} zł\n`; if(totals.discount25 > 0) content += `Rabat na 2. półkę (-25%): -${totals.discount25.toFixed(2)} zł\n`; } content += `ŁĄCZNIE DO ZAPŁATY: ${totals.total.toFixed(2)} zł\n\n`; content += `KODY ZAMÓWIEŃ DO WKLEJENIA NA ALLEGRO:\n`; content += `${allCodes}\n`; content += `========================================\n`; const blob = new Blob([content], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; const filenameDate = new Date().toISOString().slice(0, 10); link.download = `zamowienie-polki-${filenameDate}.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); }
+        function downloadFullCartSummary() { if (cart.length === 0) { alert("Koszyk jest pusty."); return; } const totals = calculateCartTotal(); const allCodes = cart.flatMap(item => Array(item.quantity).fill(item.code)).join('\n'); const date = new Date().toLocaleString('pl-PL'); let content = `PODSUMOWANIE ZAMÓWIENIA\n`; content += `Data wygenerowania: ${date}\n`; content += `========================================\n\n`; cart.forEach((item, index) => { content += `PRODUKT ${index + 1}: ${item.name} (x${item.quantity})\n`; content += `  Wymiary: ${item.summary}\n`; content += `  Kolor boków: ${item.sideColor}\n`; content += `  Kolor półek: ${item.shelfColor}\n`; content += `  Ilość półek wewn.: ${item.shelfCountText}\n`; content += `  Opcje: ${item.extras}\n`; content += `  Cena jedn.: ${item.price.toFixed(2)} zł\n\n`; }); content += `========================================\n`; if (totals.totalDiscount > 0) { content += `SUMA CZĘŚCIOWA: ${totals.subtotal.toFixed(2)} zł\n`; if(totals.discount10 > 0) content += `Rabat na 1. półkę (-10%): -${totals.discount10.toFixed(2)} zł\n`; if(totals.discount25 > 0) content += `Rabat na 2. półkę (-25%): -${totals.discount25.toFixed(2)} zł\n`; } content += `Koszt wysyłki (Kurier DPD): ${totals.shipping.toFixed(2)} zł\n`; content += `ŁĄCZNIE DO ZAPŁATY: ${totals.total.toFixed(2)} zł\n\n`; content += `KODY ZAMÓWIEŃ DO WKLEJENIA NA ALLEGRO:\n`; content += `${allCodes}\n`; content += `========================================\n`; const blob = new Blob([content], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; const filenameDate = new Date().toISOString().slice(0, 10); link.download = `zamowienie-polki-${filenameDate}.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); }
         
     function applyShelfConfigurationFromGallery(galleryIndex, imageIndex) {
             // POCZĄTEK SEKCJI DLA PÓŁKI MODUŁOWEJ
@@ -7596,6 +7655,18 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                             if (!street)    missing.push('Ulica');
                             if (!postCode)  missing.push('Kod pocztowy');
                             if (!city)      missing.push('Miasto');
+                            const invoiceFieldsEl = document.getElementById('invoiceFields');
+                            const wantInvoice = invoiceFieldsEl && invoiceFieldsEl.style.display !== 'none';
+                            if (wantInvoice) {
+                                const invCompany = document.getElementById('invoiceCompany')?.value.trim();
+                                const invNip = document.getElementById('invoiceNip')?.value.trim();
+                                const invPostCode = document.getElementById('invoicePostCode')?.value.trim();
+                                const invAddr = document.getElementById('invoiceAddress')?.value.trim();
+                                if (!invCompany) missing.push('Nazwa firmy');
+                                if (!invNip) missing.push('NIP');
+                                if (!invPostCode) missing.push('Kod pocztowy firmy');
+                                if (!invAddr) missing.push('Adres firmy');
+                            }
 
                             if (missing.length > 0) {
                                 errEl.textContent = 'Uzupełnij wymagane pola: ' + missing.join(', ');
@@ -7647,7 +7718,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 currency: 'PLN',
                                 payment_method: 'przelew',
                                 delivery_method: 'kurier',
-                                delivery_price: 0,
+                                delivery_price: totals.shipping,
                                 delivery_fullname: firstName + ' ' + lastName,
                                 delivery_address: street,
                                 delivery_city: city,
@@ -7656,7 +7727,7 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 email: email,
                                 phone: phone,
                                 user_login: email,
-                                user_comments: 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''),
+                                user_comments: (() => { let c = 'Tel: ' + phone + (notes ? ' | ' + notes : '') + (orderCode ? '\n\nKod konfiguracji:\n' + orderCode : ''); const invoiceFields = document.getElementById('invoiceFields'); if (invoiceFields && invoiceFields.style.display !== 'none') { const company = (document.getElementById('invoiceCompany') || {}).value || ''; const nip = (document.getElementById('invoiceNip') || {}).value || ''; const invAddr = (document.getElementById('invoiceAddress') || {}).value || ''; if (company || nip) c += '\n\nFAKTURA VAT:\nFirma: ' + company + '\nNIP: ' + nip + '\nAdres: ' + invAddr; } return c; })(),
                                 admin_comments: 'Zamowienie z konfiguratora na stronie',
                                 products: products
                             };
@@ -9501,6 +9572,32 @@ function addShelfDimensionArrows(group, internalShelves, bottomPanel, topPanel, 
     window.addEventListener('load', () => setTimeout(attachVerticalTouch, 800));
 })();
 
+// ===== FAKTURA VAT TOGGLE =====
+function toggleInvoiceSection() {
+    var fields = document.getElementById('invoiceFields');
+    var indicator = document.getElementById('invoiceToggleIndicator');
+    var knob = document.getElementById('invoiceToggleKnob');
+    var hint = document.getElementById('invoiceToggleHint');
+    if (!fields) return;
+    var isOpen = fields.style.display !== 'none';
+    if (isOpen) {
+        fields.style.display = 'none';
+        if (indicator) indicator.style.background = '#e5e7eb';
+        if (knob) knob.style.transform = 'translateX(0px)';
+        if (hint) hint.textContent = 'Kliknij, aby wypełnić dane firmy';
+    } else {
+        fields.style.display = 'block';
+        if (indicator) indicator.style.background = '#16a34a';
+        if (knob) knob.style.transform = 'translateX(17px)';
+        if (hint) hint.textContent = 'Dane firmy do faktury VAT';
+        // scroll do pól faktury po chwili
+        setTimeout(function() {
+            if (fields) fields.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
+}
+// ===== KONIEC FAKTURA VAT =====
+
 </script>
 
 <!-- ═══════════ STOPKA SKLEPU ═══════════ -->
@@ -9527,7 +9624,7 @@ function addShelfDimensionArrows(group, internalShelves, bottomPanel, topPanel, 
         </div>
         <div>
           <div style="font-size:.7rem;color:#9ca3af;margin-bottom:1px">E-mail</div>
-          <div style="font-weight:500">nowywymiar2@gmail.com</div>
+          <div style="font-weight:500"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8fe1e0f8f6f8f6e2e6eefdbdcfe8e2eee6e3a1ece0e2">[email&#160;protected]</a></div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;font-size:.88rem;color:#374151">
@@ -9562,12 +9659,7 @@ function addShelfDimensionArrows(group, internalShelves, bottomPanel, topPanel, 
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 function otworzKontakt(){var m=document.getElementById('kontaktModal');m.style.display='flex';document.body.style.overflow='hidden';}
-function zamknijKontakt(){var m=document.getElementById('kontaktModal');m.style.display='none';document.body.style.overflow='';}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')zamknijKontakt();});
-</script>
-<!-- ═══════════ KONIEC STOPKI ═══════════ -->
 
-    </body>
-</html>
+function zamknijKontakt(){var m=document.getElementById('kontaktModal');m.style.display='none';document.body
