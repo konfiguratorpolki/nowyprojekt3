@@ -5438,30 +5438,16 @@ function fitCameraToShelf() {
                     let startY = bottomExists ? (-targetHeight / 2 + bottomThicknessActual) : (-targetHeight / 2);
                     
                     const useCustomPos = config.customPositions && config.customPositions.length === targetShelfCount;
-                    // Stały punkt odniesienia – zawsze spód wnętrza (jak w syncPositionsFromModel),
-                    // niezależnie od tego czy dolna półka istnieje.
                     const bottomRef = -targetHeight / 2 + thickness;
-
-                    // Wykryj czy zmieniono tylko górną/dolną ścianę (bez zmiany ilości/rozmiaru półek)
-                    const onlyPanelToggled = lastValidConfig &&
-                        String(lastValidConfig.shelfCount) === String(config.shelfCount) &&
-                        String(lastValidConfig.height)     === String(config.height) &&
-                        String(lastValidConfig.width)      === String(config.width) &&
-                        (lastValidConfig.noTopShelf !== config.noTopShelf ||
-                         lastValidConfig.noBottomShelf !== config.noBottomShelf);
 
                     for (let i = 0; i < targetShelfCount; i++) {
                         const shelfName = `internalShelf_${i}`;
                         let shelf = shelfGroup.getObjectByName(shelfName);
                         let targetY;
                         if (useCustomPos) {
-                            // customPositions są mierzone od bottomRef – pozycja półek się nie zmienia
                             targetY = bottomRef + config.customPositions[i] / 10;
-                        } else if (shelf && onlyPanelToggled) {
-                            // Tylko zdjęto/dodano ścianę – półki zostają na miejscu,
-                            // zmienia się wyłącznie przerwa przy tej ścianie
-                            targetY = shelf.position.y;
                         } else {
+                            // Zawsze przelicz pozycję na nowo — uwzględnia noTop/noBottom
                             targetY = startY + (i + 1) * gap + (i + 0.5) * thickness;
                         }
 
@@ -7805,38 +7791,13 @@ function generateOrderCode() { const shelfTypeVal = shelfTypeSelect.value; const
                                 }
                             } catch(e) { console.warn('Nie można pobrać statusów, używam 0:', e); }
 
-                            // 3. Buduj produkty dla BaseLinker — z cenami po rabatach
+                            // 3. Buduj produkty dla BaseLinker
                             const totals = calculateCartTotal();
-
-                            // Rozwiń koszyk do pojedynczych jednostek
-                            const allUnits = [];
-                            cart.forEach(item => {
-                                for (let i = 0; i < item.quantity; i++) {
-                                    allUnits.push({ name: item.name, code: item.code, price: item.price });
-                                }
-                            });
-
-                            // Przypisz rabaty do jednostek
-                            const totalUnits = allUnits.length;
-                            if (totalUnits === 1) {
-                                allUnits[0].finalPrice = allUnits[0].price * (1 - DISCOUNTS.discount1item);
-                            } else if (totalUnits >= 2) {
-                                allUnits.sort((a, b) => b.price - a.price);
-                                allUnits[0].finalPrice = allUnits[0].price * (1 - DISCOUNTS.discountBest);
-                                allUnits[allUnits.length - 1].finalPrice = allUnits[allUnits.length - 1].price * (1 - DISCOUNTS.discountCheap);
-                                for (let i = 1; i < allUnits.length - 1; i++) {
-                                    allUnits[i].finalPrice = allUnits[i].price;
-                                }
-                            } else {
-                                allUnits.forEach(u => { u.finalPrice = u.price; });
-                            }
-
-                            // Buduj listę produktów (każda jednostka osobno, żeby ceny po rabatach były widoczne)
-                            const products = allUnits.map(unit => ({
-                                name: unit.name,
-                                sku: unit.code,
-                                quantity: 1,
-                                price_brutto: parseFloat(unit.finalPrice.toFixed(2)),
+                            const products = cart.map(item => ({
+                                name: item.name,
+                                sku: item.code,
+                                quantity: item.quantity,
+                                price_brutto: item.price,
                                 tax_rate: 23,
                                 weight: 2
                             }));
